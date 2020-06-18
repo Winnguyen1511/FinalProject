@@ -1,0 +1,5 @@
+-All document for psycopg
+https://www.psycopg.org/docs/
+-CRUD:
+https://pynative.com/python-postgresql-insert-update-delete-table-data-to-perform-crud-operations/#Python_PostgreSQL_Delete_Table_row_and_columns
+

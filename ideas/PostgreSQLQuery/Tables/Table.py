@@ -31,9 +31,20 @@ class Table:
             return None
         self.tableName = tableName
 
+
     def getName(self):
         print('> Table: ', self.tableName)
-        
+
+    def execute(self,query=''):
+        print(query)
+        try:
+            self.cursorDB.execute(query)
+        except (psycopg2.OperationalError, psycopg2.IntegrityError,
+                    psycopg2.DatabaseError, psycopg2.DataError) as Error:
+            print('> Error execute <%s>'%(self.tableName))
+            self.cursorDB.execute('rollback')
+        self.cursorDB.execute('commit')
+
     def drop(self):
         print('> Drop table ', self.tableName)
         SQLQuery = 'DROP TABLE '+self.tableName
@@ -42,9 +53,10 @@ class Table:
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             self.cursorDB.execute('rollback')
+            return False
             print('Error: drop')
         self.cursorDB.execute('commit')
-
+        return True
     
     def select(self, columns='*', conditions=''):
         records = []
@@ -66,17 +78,48 @@ class Table:
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             self.cursorDB.execute('rollback')
+            print(Error)
             print('> Error insert <%s>' %(self.tableName))
+            return False
         self.cursorDB.execute('commit')
-            
-    # def selectAll(self):
-    #     print('> SelectAll table ', self.tableName)
-    #     SQLQuery = 'Select * from '+self.tableName
-    #     self.cursorDB.execute(SQLQuery)
-    #     #Fetch all records:
-    #     records = self.cursorDB.fetchall()
-    #     return records
+        return True
+
+    def delete_manual(self,where=''):
+        SQLQuery = 'delete from '+self.tableName
+        if where == '':
+            print('> Error: delete_manual')
+            return False
+        try:
+            self.cursorDB.execute(SQLQuery)
+        except (psycopg2.OperationalError, psycopg2.IntegrityError,
+                    psycopg2.DatabaseError, psycopg2.DataError) as Error:
+            self.cursorDB.execute('rollback')
+            print(Error)
+            print('> Error: delete <%s>'%(self.tableName))
+            return False
+        return True
     
+    def update_manual(self, updates={}, where=''):
+        SQLQuery = 'update '+self.tableName+ ' set '
+        updatesTuple = []
+        for key in updates:
+            SQLQuery += key+'=%s,'
+            updatesTuple.append(updates[key])
+        SQLQuery = SQLQuery.rstrip(',')
+        SQLQuery += ' where '+ where
+        updatesTuple =tuple(updatesTuple)
+        
+        try:
+            self.cursorDB.execute(SQLQuery, updatesTuple)
+        except (psycopg2.OperationalError, psycopg2.IntegrityError,
+                    psycopg2.DatabaseError, psycopg2.DataError) as Error:
+            print(Error)
+            print('Error: update_manual <%s>' %(self.tableName))
+            self.cursorDB.execute('rollback')
+            return False
+        self.cursorDB.execute('commit')
+        return True
+
     def truncate(self):
         print('> Truncate table ', self.tableName)
         try:
@@ -86,7 +129,9 @@ class Table:
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             print('> Error: truncate failed')
             self.cursorDB.execute('rollback')
+            return False
         self.cursorDB.execute('commit')
+        return True
         # print('> Truncated')
     def fetchall(self):
         records = []
@@ -96,11 +141,12 @@ class Table:
             print('> Error fetchall')
         return records
 
-
+###################################################################################
 class ParkingTable(Table):
     def __init__(self, connectionDb, cursorDB):
         self.tableName = 'parking'
         super().__init__(self.tableName, connectionDb, cursorDB)
+
     def insert(self, RFID, ParkingLotID, PlateNumber='', PlateImgURL='', CheckInTime=''):
         if not rfidValid(RFID):
             print('> Error: Invalid RFID <%s>', self.tableName)
@@ -131,6 +177,56 @@ class ParkingTable(Table):
                 return False
         self.cursorDB.execute('commit')
         return True
+
+
+    def delete(self, RFID, ParkingLotID):
+        if not rfidValid(RFID):
+            print('> Error: Invalid RFID <%s>', self.tableName)
+            return False
+        if not parkingLotIDValid(ParkingLotID):
+            print('> Error: Invalid parkingLotID <%s>'%(self.tableName))
+            return False
+        SQLQuery = 'delete from '+self.tableName+' where rfid=%s and parkinglotid=%s'
+        try:
+            self.cursorDB.execute(SQLQuery, (RFID, ParkingLotID))
+        except (psycopg2.OperationalError, psycopg2.IntegrityError,
+                    psycopg2.DatabaseError, psycopg2.DataError) as Error:
+            self.cursorDB.execute('rollback')
+            print(Error)
+            print('Error: delete <%s>'%(self.tableName))
+            return False
+        self.cursorDB.execute('commit')
+        return True
+    
+    def update(self,RFID, ParkingLotID, updates= {}):
+        if not rfidValid(RFID):
+            print('> Error: Invalid RFID <%s>', self.tableName)
+            return False
+        if not parkingLotIDValid(ParkingLotID):
+            print('> Error: Invalid parkingLotID <%s>'%(self.tableName))
+            return False
+        SQLQuery = 'update '+self.tableName +' set '
+        updatesTuple = []
+        for key in updates:
+            SQLQuery += key+'=%s,'
+            updatesTuple.append(updates[key])
+        SQLQuery = SQLQuery.rstrip(',')
+        SQLQuery += ' where rfid=%s and parkinglotid=%s'
+        updatesTuple.extend([RFID, ParkingLotID])
+        updatesTuple = tuple(updatesTuple)
+
+
+        try:
+            self.cursorDB.execute(SQLQuery, updatesTuple)
+        except (psycopg2.OperationalError, psycopg2.IntegrityError,
+                    psycopg2.DatabaseError, psycopg2.DataError) as Error:
+            print(Error)
+            print('> Error update <%s>'%(self.tableName))
+            self.cursorDB.execute('rollback')
+            return False
+        self.cursorDB.execute('commit')
+        return True
+############################################################################        
 
 listTableName = {
                 'parking': ParkingTable,

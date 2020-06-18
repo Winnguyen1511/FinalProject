@@ -70,23 +70,40 @@ def main():
     records = park.select()
     for rec in records:
         print(rec)
-    park.insert('1211eq','PKL012')
-    print('> After insert...')
+    # park.insert('1211eq','PKL012')
+    # print('> After insert...')
+    # records = park.select()
+    # for rec in records:
+    #     print(rec)
+    # park.insert('1111','PKL011','43A00967', '/home/khoa/Download', DT.now())
+    # print('> After insert...')
+    # records = park.select()
+    # for rec in records:
+    #     print(rec)
+    # park.insert('1112','PKL011','92A0099', '/home/khoa/Download')
+    # print('> After insert...')
+    # records = park.select()
+    # for rec in records:
+    #     print(rec)
+    # park.insert_manual(columns='rfid, parkinglotid',values='1234, PLK100')
+    # print('> After insert...')
+    # records = park.select()
+    # for rec in records:
+    #     print(rec)
+    # park.delete('1112', 'PKL011')
+    # print('> After delete...')
+    # records = park.select()
+    # for rec in records:
+    #     print(rec)
+
+    park.update('12', '123', {'rfid':'abcsd', 'parkinglotid':'PKL001', 'platenumber':'43A00969'})
+    print('> After update...')
     records = park.select()
     for rec in records:
         print(rec)
-    park.insert('1111','PKL011','43A00967', '/home/khoa/Download', DT.now())
-    print('> After insert...')
-    records = park.select()
-    for rec in records:
-        print(rec)
-    park.insert('1112','PKL011','92A0099', '/home/khoa/Download')
-    print('> After insert...')
-    records = park.select()
-    for rec in records:
-        print(rec)
-    park.insert_manual(columns='rfid, parkinglotid',values='1234, PLK100')
-    print('> After insert...')
+
+    park.update_manual(updates={'plateimgurl':'/home/khoa/tmp'}, where="rfid='abcsd'")
+    print('> After update...')
     records = park.select()
     for rec in records:
         print(rec)
