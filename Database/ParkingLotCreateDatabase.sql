@@ -6,15 +6,19 @@
 
 CREATE TABLE Parking
 (
-    RFID    char(64),
+    RFID    char(12),
     ParkingLotID    char(6),
     PlateNumber     VARCHAR(15),
     PlateImgURL     VARCHAR(255),
-    CheckInTime TIMESTAMP,
-    CONSTRAINT PK_ParkingTmp_RFID_ParkingLotID
+    CheckInTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
+    CONSTRAINT PK_Parking_RFID_ParkingLotID
     PRIMARY KEY(RFID, ParkingLotID)
 );
 
+-- drop table Parking;
+-- alter table Parking
+-- add CheckInTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0);
+--drop column checkintime;
 -- drop TABLE parking;
 
 -- 2) ParkingLotHistory: CORE
@@ -72,6 +76,14 @@ create TABLE ParkingLotList
     PRIMARY KEY(ParkingLotID)
 );
 
+insert into parkinglotlist
+(ParkingLotID, ParkingLotName)
+VALUES
+(
+    'PKL001',
+    'Parking Lot 1'
+);
+-- TRUNCATE TABLE parkinglotlist;
 -- 5) CameraList:
 
 create TABLE CameraList
@@ -91,3 +103,33 @@ create TABLE CameraList
 -- add CONSTRAINT  PK_CameraList_CameraID
 -- primary key(CameraID, ParkingLotID);
 -- drop CONSTRAINT  PK_CameraList_CameraID;
+
+insert into Parking
+(RFID, ParkingLotID, PlateNumber, PlateImgURL)
+VALUES
+(
+    '123456',
+    'PKL001',
+    '43A12345',
+    '/home/khoa/img' 
+);
+
+insert into Parking
+(RFID, ParkingLotID, PlateNumber, PlateImgURL)
+VALUES
+(
+    '111111',
+    'PKL001',
+    '43A12346',
+    '/home/khoa/img'
+);
+
+insert into Parking
+(RFID, ParkingLotID, PlateNumber, PlateImgURL)
+VALUES
+(
+    '12345999',
+    'PKL002',
+    '92A99999',
+    '/home/khoa/img'
+);
