@@ -1,6 +1,6 @@
 import psycopg2
 import argparse
-from Tables.Table import *
+from Tables.Table import ParkingTable
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '5432'
@@ -55,16 +55,26 @@ def main():
     else:
         print('> Error: Log in error to <%s>'%(username))
     
-    table = Table('parking', conn, cur)
-    table.getName()
-    records = table.selectAll()
-    # print(records)
-    for rec in records:
-        print(rec)
+    # table = Table('parking', conn, cur)
+    # table.getName()
+    # records = table.selectAll()
+    # # print(records)
+    # for rec in records:
+    #     print(rec)
     # records = table.fetchall()
     # print('1',records)
     # records = table.fetchall()
     # print('2',records)
+    park = ParkingTable(conn,cur)
+    # records = park.select(columns='*', conditions="where rfid like '123%'")
+    records = park.select()
+    for rec in records:
+        print(rec)
+    park.insert('1211312','PKL003')
+    print('> After insert...')
+    records = park.select()
+    for rec in records:
+        print(rec)
 
 if __name__ == '__main__':
     main()
