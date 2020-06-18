@@ -1,7 +1,7 @@
 import psycopg2
 import argparse
 from Tables.Table import ParkingTable
-
+from datetime import datetime as DT
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '5432'
 DEFAULT_USERNAME = 'winnguyen'
@@ -70,7 +70,22 @@ def main():
     records = park.select()
     for rec in records:
         print(rec)
-    park.insert('1211312','PKL003')
+    park.insert('1211eq','PKL012')
+    print('> After insert...')
+    records = park.select()
+    for rec in records:
+        print(rec)
+    park.insert('1111','PKL011','43A00967', '/home/khoa/Download', DT.now())
+    print('> After insert...')
+    records = park.select()
+    for rec in records:
+        print(rec)
+    park.insert('1112','PKL011','92A0099', '/home/khoa/Download')
+    print('> After insert...')
+    records = park.select()
+    for rec in records:
+        print(rec)
+    park.insert_manual(columns='rfid, parkinglotid',values='1234, PLK100')
     print('> After insert...')
     records = park.select()
     for rec in records:

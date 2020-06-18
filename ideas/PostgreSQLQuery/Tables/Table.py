@@ -37,7 +37,14 @@ class Table:
     def drop(self):
         print('> Drop table ', self.tableName)
         SQLQuery = 'DROP TABLE '+self.tableName
-        self.cursorDB.execute(SQLQuery)
+        try:
+            self.cursorDB.execute(SQLQuery)
+        except (psycopg2.OperationalError, psycopg2.IntegrityError,
+                    psycopg2.DatabaseError, psycopg2.DataError) as Error:
+            self.cursorDB.execute('rollback')
+            print('Error: drop')
+        self.cursorDB.execute('commit')
+
     
     def select(self, columns='*', conditions=''):
         records = []
@@ -48,7 +55,20 @@ class Table:
         except psycopg2.OperationalError:
             print('> Error select <%s>'%self.tableName)
         return records
-
+    def insert_manual(self, columns='', values=''):
+        SQLQuery = 'insert into ' +self.tableName
+        if columns != '': 
+            SQLQuery +=' ('+columns+') '
+        if values != '':
+            SQLQuery += ' values '+ ' ('+values+') '
+        try:
+            self.cursorDB.execute(SQLQuery)
+        except (psycopg2.OperationalError, psycopg2.IntegrityError,
+                    psycopg2.DatabaseError, psycopg2.DataError) as Error:
+            self.cursorDB.execute('rollback')
+            print('> Error insert <%s>' %(self.tableName))
+        self.cursorDB.execute('commit')
+            
     # def selectAll(self):
     #     print('> SelectAll table ', self.tableName)
     #     SQLQuery = 'Select * from '+self.tableName
@@ -62,8 +82,11 @@ class Table:
         try:
             SQLQuery = 'Truncate table '+self.tableName
             self.cursorDB.execute(SQLQuery)
-        except psycopg2.OperationalError:
+        except (psycopg2.OperationalError, psycopg2.IntegrityError,
+                    psycopg2.DatabaseError, psycopg2.DataError) as Error:
             print('> Error: truncate failed')
+            self.cursorDB.execute('rollback')
+        self.cursorDB.execute('commit')
         # print('> Truncated')
     def fetchall(self):
         records = []
@@ -88,8 +111,9 @@ class ParkingTable(Table):
         if CheckInTime == '':
             print('> Warning: take default checkInTime <%s>'%(self.tableName))
             try:
-                self.cursorDB.execute('insert into %s (rfid, parkinglotid, platenumber, plateimgurl)\
-                                values (%s, %s, %s, %s)', (self.tableName,RFID, ParkingLotID, PlateNumber, PlateImgURL,))
+                SQLQuery = 'insert into '+self.tableName+ ' (rfid, parkinglotid, platenumber, plateimgurl)\
+                                values (%s, %s, %s, %s)'
+                self.cursorDB.execute(SQLQuery, (RFID, ParkingLotID, PlateNumber, PlateImgURL,))
             except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
                 print('> Error: insert <%s>'%(self.tableName))
@@ -97,8 +121,9 @@ class ParkingTable(Table):
                 return False
         else:
             try:
-                self.cur.execute('insert into %s (rfid, parkinglotid, platenumber, plateimgurl, checkintime)\
-                                values (%s, %s, %s, %s, %s)', (self.tableName, RFID, ParkingLotID, PlateNumber, PlateImgURL, CheckInTime,))
+                SQLQuery = 'insert into '+self.tableName+ ' (rfid, parkinglotid, platenumber, plateimgurl, checkintime)\
+                                values (%s, %s, %s, %s, %s)'
+                self.cursorDB.execute(SQLQuery, (RFID, ParkingLotID, PlateNumber, PlateImgURL, CheckInTime,))
             except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
                 self.cursorDB.execute('rollback')
