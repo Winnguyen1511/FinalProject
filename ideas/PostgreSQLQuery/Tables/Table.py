@@ -5,7 +5,11 @@ def rfidValid(rfid):
     return True
 def parkingLotIDValid(parkingLotID):
     return True
+def staffIDValid(staffID):
+    return True
 
+def cameraIDValid(cameraID):
+    return True
 class Table:
     def __init__(self, tableName, connectionDb, cursorDB):
         #Init Table:
@@ -67,22 +71,47 @@ class Table:
         except psycopg2.OperationalError:
             print('> Error select <%s>'%self.tableName)
         return records
-    def insert_manual(self, columns='', values=''):
-        SQLQuery = 'insert into ' +self.tableName
-        if columns != '': 
-            SQLQuery +=' ('+columns+') '
-        if values != '':
-            SQLQuery += ' values '+ ' ('+values+') '
-        try:
-            self.cursorDB.execute(SQLQuery)
+    # def insert_manual(self, columns='', values=''):
+    #     SQLQuery = 'insert into ' +self.tableName
+    #     if columns != '': 
+    #         SQLQuery +=' ('+columns+') '
+    #     if values != '':
+    #         SQLQuery += ' values '+ ' ('+values+') '
+    #     try:
+    #         self.cursorDB.execute(SQLQuery)
+    #     except (psycopg2.OperationalError, psycopg2.IntegrityError,
+    #                 psycopg2.DatabaseError, psycopg2.DataError) as Error:
+    #         self.cursorDB.execute('rollback')
+    #         print(Error)
+    #         print('> Error insert <%s>' %(self.tableName))
+    #         return False
+    #     self.cursorDB.execute('commit')
+    #     return True
+
+    def insert_manual(self, records={}):
+        SQLQuery = 'insert into '+self.tableName+' ('
+        valuesQuery = 'values('
+        recordsTuple = []
+        for key in records:
+            SQLQuery += key+','
+            valuesQuery+='%s,'
+            recordsTuple.append(records[key])
+        SQLQuery = SQLQuery.rstrip(',')
+        valuesQuery = valuesQuery.rstrip(',')
+        SQLQuery +=') '+valuesQuery+')'
+        recordsTuple = tuple(recordsTuple)
+        try: 
+            self.cursorDB.execute(SQLQuery,recordsTuple)
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             self.cursorDB.execute('rollback')
             print(Error)
-            print('> Error insert <%s>' %(self.tableName))
+            print('> Error: insert error <%s>'%(self.tableName))
             return False
         self.cursorDB.execute('commit')
         return True
+
+
 
     def delete_manual(self,where=''):
         SQLQuery = 'delete from '+self.tableName
@@ -226,8 +255,81 @@ class ParkingTable(Table):
             return False
         self.cursorDB.execute('commit')
         return True
-############################################################################        
+############################################################################
+class HistoryTable(Table):
+    def __init__(self, connectionDb, cursorDB):
+        self.tableName = 'history'
+        super().__init__(self, self.tableName, connectionDb, cursorDB)
+    
+    def insert(self,RFID='', ParkingLotID='', PlateNumber='', PlateImgURL='',StaffID='',\
+                CameraID='', InOrOut=True, CheckTime=''):
+        if not rfidValid(RFID):
+            print('> Error: Invalid RFID <%s>', self.tableName)
+            return False
+        if not parkingLotIDValid(ParkingLotID):
+            print('> Error: Invalid parkingLotID <%s>'%(self.tableName))
+            return False
+        if not cameraIDValid(CameraID):
+            print('> Error: Invalid cameraID <%s>'%(self.tableName))
+            return False
+        if not staffIDValid(staffIDValid):
+            print('> Error: Invalid staffID <%s>'%(self.tableName))
+            return False
+        try:
+            SQLQuery = 'insert into '+self.tableName+ ' (rfid, parkinglotid, platenumber, plateimgurl,\
+                        staffid, cameraid, inorout, checktime) \
+                        values(%s, %s, %s, %s, %s, %s, %s, %s)'
+            insertTuple = (RFID, ParkingLotID,ParkingLotID, PlateNumber, PlateImgURL,StaffID,CameraID,InOrOut,CheckTime,)
+            self.cursorDB.execute(SQLQuery, insertTuple)
+        except (psycopg2.OperationalError, psycopg2.IntegrityError,
+                    psycopg2.DatabaseError, psycopg2.DataError) as Error:
+            print(Error)
+            print('> Error: insert error <%s>'%(self.tableName))
+            self.cursorDB.execute('rollback')
+            return False
+        self.cursorDB.execute('commit')
+        return True
 
+    def update(self, parkingID, updates={}):
+        SQLQuery = 'update '+self.tableName +' set '
+        updatesTuple = []
+        for key in updates:
+            SQLQuery += key+'=%s,'
+            updatesTuple.append(updates[key])
+        SQLQuery = SQLQuery.rstrip(',')
+        SQLQuery += ' where parkingid=%s'
+        updatesTuple.extend([parkingID])
+        updatesTuple = tuple(updatesTuple)
+        try:
+            self.cursorDB.execute(SQLQuery, updatesTuple)
+        except (psycopg2.OperationalError, psycopg2.IntegrityError,
+                    psycopg2.DatabaseError, psycopg2.DataError) as Error:
+            print(Error)
+            print('Error: update error <%s>'%(self.tableName))
+            self.cursorDB.execute('rollback')
+            return False
+        self.cursorDB.execute('commit')
+        return True
+
+
+    def delete(self, parkingID):
+        SQLQuery = 'delete from '+self.tableName+' where parkingID=%s'
+        try:
+            self.cursorDB.execute(SQLQuery, (parkingID,))
+        except (psycopg2.OperationalError, psycopg2.IntegrityError,
+                    psycopg2.DatabaseError, psycopg2.DataError) as Error:
+            print(Error)
+            print('> Error: delete error <%s>'%(self.tableName))
+            self.cursorDB.execute('rollback')
+            return False
+        self.cursorDB.execute('commit')
+        return True
+
+
+
+
+
+############################################################################
 listTableName = {
                 'parking': ParkingTable,
                 'history':None,

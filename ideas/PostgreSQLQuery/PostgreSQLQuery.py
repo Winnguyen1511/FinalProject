@@ -65,11 +65,11 @@ def main():
     # print('1',records)
     # records = table.fetchall()
     # print('2',records)
-    park = ParkingTable(conn,cur)
-    # records = park.select(columns='*', conditions="where rfid like '123%'")
-    records = park.select()
-    for rec in records:
-        print(rec)
+    # park = ParkingTable(conn,cur)
+    # # records = park.select(columns='*', conditions="where rfid like '123%'")
+    # records = park.select()
+    # for rec in records:
+    #     print(rec)
     # park.insert('1211eq','PKL012')
     # print('> After insert...')
     # records = park.select()
@@ -96,17 +96,18 @@ def main():
     # for rec in records:
     #     print(rec)
 
-    park.update('12', '123', {'rfid':'abcsd', 'parkinglotid':'PKL001', 'platenumber':'43A00969'})
-    print('> After update...')
-    records = park.select()
-    for rec in records:
-        print(rec)
+    # park.update('12', '123', {'rfid':'abcsd', 'parkinglotid':'PKL001', 'platenumber':'43A00969'})
+    # print('> After update...')
+    # records = park.select()
+    # for rec in records:
+    #     print(rec)
 
-    park.update_manual(updates={'plateimgurl':'/home/khoa/tmp'}, where="rfid='abcsd'")
-    print('> After update...')
-    records = park.select()
-    for rec in records:
-        print(rec)
+    # park.update_manual(updates={'plateimgurl':'/home/khoa/tmp'}, where="rfid='abcsd'")
+    # print('> After update...')
+    # records = park.select()
+    # for rec in records:
+    #     print(rec)
+    
 
 if __name__ == '__main__':
     main()
