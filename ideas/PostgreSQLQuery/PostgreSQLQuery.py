@@ -65,21 +65,33 @@ def main():
     # print('1',records)
     # records = table.fetchall()
     # print('2',records)
-    # park = ParkingTable(conn,cur)
+    park = ParkingTable(conn,cur)
     # # records = park.select(columns='*', conditions="where rfid like '123%'")
     # records = park.select()
     # for rec in records:
     #     print(rec)
-    # park.insert('1211eq','PKL012')
-    # print('> After insert...')
-    # records = park.select()
-    # for rec in records:
-    #     print(rec)
-    # park.insert('1111','PKL011','43A00967', '/home/khoa/Download', DT.now())
-    # print('> After insert...')
-    # records = park.select()
-    # for rec in records:
-    #     print(rec)
+    park.insert('1211eq','PKL012')
+    print('> After insert...')
+    records = park.select()
+    for rec in records:
+        print(rec)
+    park.insert('1111','PKL011','43A00967', '/home/khoa/Download', DT.now())
+    print('> After insert...')
+    records = park.select()
+    for rec in records:
+        print(rec)
+
+    park.delete('12','123')
+    print('> After delete...')
+    records = park.select()
+    for rec in records:
+        print(rec)
+    
+    park.update('12','123',{'foo':123})
+    print('> After update...')
+    records = park.select()
+    for rec in records:
+        print(rec)
     # park.insert('1112','PKL011','92A0099', '/home/khoa/Download')
     # print('> After insert...')
     # records = park.select()

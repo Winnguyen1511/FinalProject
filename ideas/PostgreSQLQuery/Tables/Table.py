@@ -1,6 +1,9 @@
 
 import psycopg2
+import os
 from datetime import datetime as DT
+
+logdir = 'log/'
 
 def rfidValid(rfid):
     return True
@@ -15,7 +18,10 @@ class Table:
     def __init__(self, tableName, connectionDb, cursorDB):
         #Init Log system:
         t = DT.now()
-        logname = 'log'+t.strftime("%y_%m_%d_%H%M%S")
+        if not os.path.isdir(logdir):
+            os.mkdir(logdir)
+        
+        logname = logdir+'log'+t.strftime("%y_%m_%d_%H%M%S")
         self.logfile = open(logname, 'w')
         #Init Table:
         self.connectionDb = connectionDb
@@ -41,7 +47,7 @@ class Table:
 
     def log(self, logtype=-1,  line='',thr=None,):
         t = DT.now()
-        log = '[LOG] Time: '+t.strftime("%y_%m_%d_%H%M%S")+'\n'
+        log = '[LOG] Time: '+t.strftime("%Y-%m-%d %H:%M:%S")+'\n'
         self.logfile.write(log)
         if logtype == -1:
             #print error
@@ -49,7 +55,7 @@ class Table:
             self.logfile.write(log)
             log = str(thr)+'\n'
             self.logfile.write(log)
-        self.logfile.write('-------------------------------------------\n')
+        self.logfile.write('-------------------------------------------------------\n')
 
 
     def getName(self):

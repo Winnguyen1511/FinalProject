@@ -1,0 +1,19 @@
+[LOG] Time: 2020-06-19 09:50:24
+[ERROR] > Error insert <parking>
+duplicate key value violates unique constraint "pk_parking_rfid_parkinglotid"
+DETAIL:  Key (rfid, parkinglotid)=(1211eq      , PKL012) already exists.
+
+-------------------------------------------------------
+[LOG] Time: 2020-06-19 09:50:24
+[ERROR] > Error insert <parking>
+duplicate key value violates unique constraint "pk_parking_rfid_parkinglotid"
+DETAIL:  Key (rfid, parkinglotid)=(1111        , PKL011) already exists.
+
+-------------------------------------------------------
+[LOG] Time: 2020-06-19 09:50:24
+[ERROR] > Error update <parking>
+column "foo" of relation "parking" does not exist
+LINE 1: update parking set foo=123 where rfid='12' and parkinglotid=...
+                           ^
+
+-------------------------------------------------------
