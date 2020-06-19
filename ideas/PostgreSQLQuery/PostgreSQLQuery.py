@@ -107,7 +107,7 @@ def main():
     # records = park.select()
     # for rec in records:
     #     print(rec)
-    his = HistoryTable(conn, cur)
+    # his = HistoryTable(conn, cur)
     # his.insert('asdas12', 'PKL011', '43A00969', '/home/khoa/Download','STF001', 'CMR007', False,DT.now())
     # print('> After update...')
     # records = his.select()
@@ -119,7 +119,7 @@ def main():
     # records = his.select()
     # for rec in records:
     #     print(rec)
-    his.truncate()
+    # his.truncate()
 
 
 

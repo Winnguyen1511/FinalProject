@@ -1,5 +1,6 @@
 
 import psycopg2
+from datetime import datetime as DT
 
 def rfidValid(rfid):
     return True
@@ -12,8 +13,11 @@ def cameraIDValid(cameraID):
     return True
 class Table:
     def __init__(self, tableName, connectionDb, cursorDB):
+        #Init Log system:
+        t = DT.now()
+        logname = 'log'+t.strftime("%y_%m_%d_%H%M%S")
+        self.logfile = open(logname, 'w')
         #Init Table:
-        
         self.connectionDb = connectionDb
         self.cursorDB = cursorDB
         if connectionDb is None:
@@ -35,6 +39,18 @@ class Table:
             return None
         self.tableName = tableName
 
+    def log(self, logtype=-1,  line='',thr=None,):
+        t = DT.now()
+        log = '[LOG] Time: '+t.strftime("%y_%m_%d_%H%M%S")+'\n'
+        self.logfile.write(log)
+        if logtype == -1:
+            #print error
+            log = '[ERROR] '+ line+'\n'
+            self.logfile.write(log)
+            log = str(thr)+'\n'
+            self.logfile.write(log)
+        self.logfile.write('-------------------------------------------\n')
+
 
     def getName(self):
         print('> Table: ', self.tableName)
@@ -45,7 +61,10 @@ class Table:
             self.cursorDB.execute(query)
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
-            print('> Error execute <%s>'%(self.tableName))
+            print(Error)
+            logline='> Error execute <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
             self.cursorDB.execute('rollback')
         self.cursorDB.execute('commit')
 
@@ -57,8 +76,11 @@ class Table:
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             self.cursorDB.execute('rollback')
+            print(Error)
+            logline='> Error drop <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
             return False
-            print('Error: drop')
         self.cursorDB.execute('commit')
         return True
     
@@ -68,8 +90,11 @@ class Table:
         try:
             self.cursorDB.execute(SQLQuery)
             records = self.cursorDB.fetchall()
-        except psycopg2.OperationalError:
-            print('> Error select <%s>'%self.tableName)
+        except psycopg2.OperationalError as Error:
+            print(Error)
+            logline='> Error select <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
         return records
 
     def insert_manual(self, records={}):
@@ -90,7 +115,9 @@ class Table:
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             self.cursorDB.execute('rollback')
             print(Error)
-            print('> Error: insert error <%s>'%(self.tableName))
+            logline='> Error insert <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
             return False
         self.cursorDB.execute('commit')
         return True
@@ -108,7 +135,9 @@ class Table:
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             self.cursorDB.execute('rollback')
             print(Error)
-            print('> Error: delete <%s>'%(self.tableName))
+            logline='> Error execute <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
             return False
         return True
     
@@ -127,7 +156,9 @@ class Table:
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             print(Error)
-            print('Error: update_manual <%s>' %(self.tableName))
+            logline='> Error update <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
             self.cursorDB.execute('rollback')
             return False
         self.cursorDB.execute('commit')
@@ -140,7 +171,10 @@ class Table:
             self.cursorDB.execute(SQLQuery)
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
-            print('> Error: truncate failed')
+            print(Error)
+            logline='> Error truncate <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
             self.cursorDB.execute('rollback')
             return False
         self.cursorDB.execute('commit')
@@ -150,8 +184,11 @@ class Table:
         records = []
         try:
             records = self.cursorDB.fetchall()
-        except psycopg2.OperationalError:
-            print('> Error fetchall')
+        except psycopg2.OperationalError as Error:
+            print(Error)
+            logline='> Error fetchall <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
         return records
 
 ###################################################################################
@@ -175,7 +212,10 @@ class ParkingTable(Table):
                 self.cursorDB.execute(SQLQuery, (RFID, ParkingLotID, PlateNumber, PlateImgURL,))
             except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
-                print('> Error: insert <%s>'%(self.tableName))
+                print(Error)
+                logline='> Error insert <'+self.tableName+'>'
+                print(logline)
+                self.log(line= logline, thr=Error)
                 self.cursorDB.execute('rollback')
                 return False
         else:
@@ -186,7 +226,10 @@ class ParkingTable(Table):
             except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
                 self.cursorDB.execute('rollback')
-                print('> Error: insert <%s>'%(self.tableName))
+                print(Error)
+                logline='> Error insert <'+self.tableName+'>'
+                print(logline)
+                self.log(line= logline, thr=Error)
                 return False
         self.cursorDB.execute('commit')
         return True
@@ -206,7 +249,9 @@ class ParkingTable(Table):
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             self.cursorDB.execute('rollback')
             print(Error)
-            print('Error: delete <%s>'%(self.tableName))
+            logline='> Error delete <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
             return False
         self.cursorDB.execute('commit')
         return True
@@ -234,7 +279,9 @@ class ParkingTable(Table):
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             print(Error)
-            print('> Error update <%s>'%(self.tableName))
+            logline='> Error update <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
             self.cursorDB.execute('rollback')
             return False
         self.cursorDB.execute('commit')
@@ -268,7 +315,9 @@ class HistoryTable(Table):
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             print(Error)
-            print('> Error: insert error <%s>'%(self.tableName))
+            logline='> Error update <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
             self.cursorDB.execute('rollback')
             return False
         self.cursorDB.execute('commit')
@@ -289,7 +338,9 @@ class HistoryTable(Table):
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             print(Error)
-            print('Error: update error <%s>'%(self.tableName))
+            logline='> Error update <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
             self.cursorDB.execute('rollback')
             return False
         self.cursorDB.execute('commit')
@@ -303,7 +354,9 @@ class HistoryTable(Table):
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
             print(Error)
-            print('> Error: delete error <%s>'%(self.tableName))
+            logline='> Error update <'+self.tableName+'>'
+            print(logline)
+            self.log(line= logline, thr=Error)
             self.cursorDB.execute('rollback')
             return False
         self.cursorDB.execute('commit')
