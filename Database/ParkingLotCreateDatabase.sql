@@ -26,18 +26,26 @@ CREATE TABLE Parking
 CREATE TABLE History
 (
     ParkingID SERIAL,
-    ParkingTime TIMESTAMP,
     RFID    char(64),
     PlateNumber VARCHAR(15),
     PlateImgURL VARCHAR(255),
     StaffID     char(6),
     ParkingLotID    char(6),
     CameraID    char(6),
-    CheckInTime TIMESTAMP,
-    CheckOutTime    TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
+    InOrOut     BOOLEAN,
+    CheckTime   timestamp,
     CONSTRAINT  PK_History_ParkingID
     primary key(ParkingID)
 );
+-- alter table history
+-- drop column CheckInTime;
+-- ALTER TABLE history
+-- Drop column CheckOutTime;
+-- ALTER TABLE history
+-- add InOrOut BOOLEAN;
+-- ALTER TABLE history
+-- add CheckTime timestamp;
+
 
 -- ALTER TABLE history
 -- add CheckInTime TIMESTAMP;

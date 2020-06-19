@@ -1,6 +1,6 @@
 import psycopg2
 import argparse
-from Tables.Table import ParkingTable
+from Tables.Table import *
 from datetime import datetime as DT
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '5432'
@@ -107,7 +107,21 @@ def main():
     # records = park.select()
     # for rec in records:
     #     print(rec)
-    
+    his = HistoryTable(conn, cur)
+    # his.insert('asdas12', 'PKL011', '43A00969', '/home/khoa/Download','STF001', 'CMR007', False,DT.now())
+    # print('> After update...')
+    # records = his.select()
+    # for rec in records:
+    #     print(rec)
+
+    # his.insert_manual({'rfid': 'aaaaa', 'checktime':DT.now(), 'inorout':True})
+    # print('> After update...')
+    # records = his.select()
+    # for rec in records:
+    #     print(rec)
+    his.truncate()
+
+
 
 if __name__ == '__main__':
     main()

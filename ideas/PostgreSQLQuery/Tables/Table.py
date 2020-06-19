@@ -71,22 +71,6 @@ class Table:
         except psycopg2.OperationalError:
             print('> Error select <%s>'%self.tableName)
         return records
-    # def insert_manual(self, columns='', values=''):
-    #     SQLQuery = 'insert into ' +self.tableName
-    #     if columns != '': 
-    #         SQLQuery +=' ('+columns+') '
-    #     if values != '':
-    #         SQLQuery += ' values '+ ' ('+values+') '
-    #     try:
-    #         self.cursorDB.execute(SQLQuery)
-    #     except (psycopg2.OperationalError, psycopg2.IntegrityError,
-    #                 psycopg2.DatabaseError, psycopg2.DataError) as Error:
-    #         self.cursorDB.execute('rollback')
-    #         print(Error)
-    #         print('> Error insert <%s>' %(self.tableName))
-    #         return False
-    #     self.cursorDB.execute('commit')
-    #     return True
 
     def insert_manual(self, records={}):
         SQLQuery = 'insert into '+self.tableName+' ('
@@ -259,7 +243,7 @@ class ParkingTable(Table):
 class HistoryTable(Table):
     def __init__(self, connectionDb, cursorDB):
         self.tableName = 'history'
-        super().__init__(self, self.tableName, connectionDb, cursorDB)
+        super().__init__(self.tableName, connectionDb, cursorDB)
     
     def insert(self,RFID='', ParkingLotID='', PlateNumber='', PlateImgURL='',StaffID='',\
                 CameraID='', InOrOut=True, CheckTime=''):
@@ -279,7 +263,7 @@ class HistoryTable(Table):
             SQLQuery = 'insert into '+self.tableName+ ' (rfid, parkinglotid, platenumber, plateimgurl,\
                         staffid, cameraid, inorout, checktime) \
                         values(%s, %s, %s, %s, %s, %s, %s, %s)'
-            insertTuple = (RFID, ParkingLotID,ParkingLotID, PlateNumber, PlateImgURL,StaffID,CameraID,InOrOut,CheckTime,)
+            insertTuple = (RFID, ParkingLotID, PlateNumber, PlateImgURL,StaffID,CameraID,InOrOut,CheckTime,)
             self.cursorDB.execute(SQLQuery, insertTuple)
         except (psycopg2.OperationalError, psycopg2.IntegrityError,
                     psycopg2.DatabaseError, psycopg2.DataError) as Error:
