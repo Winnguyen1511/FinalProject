@@ -111,10 +111,13 @@ create TABLE CameraList
     ParkingLotID    CHAR(6),
     CameraBrand VARCHAR(20),
     CameraSpec  VARCHAR(40),
+    InOrOut     BOOLEAN,
     CONSTRAINT  PK_CameraList_CameraID
-    PRIMARY KEY(CameraID, ParkingLotID)
+    PRIMARY KEY(CameraID)
 );
-
+alter table CameraList add InOrOut     BOOLEAN;
+-- TRUNCATE table CameraList;
+-- drop table cameralist;
 -- alter table History
 -- add RFID char(12);
 -- alter TABLE cameralist
@@ -170,12 +173,6 @@ add CONSTRAINT FK_STAFFLIST_PARKINGLOTLIST_ParkingLotID
 foreign key (ParkingLotID) REFERENCES ParkingLotList(ParkingLotID) ON DELETE CASCADE;
 
 alter table cameralist
--- create TABLE RFIDList
--- (
---     RFID    char(12),
---     ParkingLotID char(6),
---     BarCode char()
--- );
 add CONSTRAINT FK_CAMERALIST_PARKINGLOTLIST_ParkingLotID
 foreign key (ParkingLotID) REFERENCES ParkingLotList(ParkingLotID) ON DELETE CASCADE;
 
@@ -186,4 +183,21 @@ foreign key (ParkingLotID) REFERENCES ParkingLotList(ParkingLotID) ON DELETE CAS
 
 -- foreign key 2 core tables: parking & history
 alter table parking
-add CONSTRAINT
+add CONSTRAINT FK_PARKING_PARKINGLOTLIST_ParkingLotID 
+FOREIGN KEY(ParkingLotID) REFERENCES parkingLotList(ParkingLotID) ON DELETE CASCADE;
+
+alter table history
+add constraint FK_HISTORY_PARKINGLOTLIST_ParkingLotID
+foreign key(ParkingLotID) references parkingLotList(ParkingLotID) ON DELETE CASCADE;
+
+alter table history
+add constraint FK_HISTORY_STAFFLIST_StaffID
+foreign key(StaffID) references StaffList(StaffID);
+
+alter table history
+add constraint FK_HISTORY_CAMERALIST_CameraID
+foreign key(CameraID) references CameraList(CameraID);
+
+
+-- alter table history
+-- drop constraint FK_HISTORY_CAMERALIST_CameraID
