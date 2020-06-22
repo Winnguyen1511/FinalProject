@@ -14,6 +14,15 @@ CREATE TABLE Parking
     CONSTRAINT PK_Parking_RFID_ParkingLotID
     PRIMARY KEY(RFID, ParkingLotID)
 );
+drop TABLE Parking;
+alter table Parking
+add ParkingLotID char(6);
+
+alter table parking
+add CONSTRAINT PK_Parking_RFID_ParkingLotID
+PRIMARY KEY(RFID, ParkingLotID);
+-- alter table Parking
+-- add StaffID char(6);
 
 -- drop table Parking;
 -- alter table Parking
@@ -26,17 +35,19 @@ CREATE TABLE Parking
 CREATE TABLE History
 (
     ParkingID SERIAL,
-    RFID    char(64),
+    RFID    char(12),
+    ParkingLotID char(6),
     PlateNumber VARCHAR(15),
     PlateImgURL VARCHAR(255),
     StaffID     char(6),
-    ParkingLotID    char(6),
     CameraID    char(6),
     InOrOut     BOOLEAN,
     CheckTime   timestamp,
     CONSTRAINT  PK_History_ParkingID
     primary key(ParkingID)
 );
+-- alter table History
+-- add ParkingLotID char(6);
 -- alter table history
 -- drop column CheckInTime;
 -- ALTER TABLE history
@@ -53,8 +64,6 @@ CREATE TABLE History
 -- ALTER TABLE history
 -- add CheckInTime TIMESTAMP;
 
-ALTER TABLE history
-add CheckOutTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0);
 
 
 -- alter TABLE history
@@ -70,11 +79,13 @@ create  TABLE StaffList
 (
     StaffID     char(6),
     StaffFullname   VARCHAR(30),
+    parkinglotid char(6),
     CONSTRAINT PK_Staff_StaffID
     PRIMARY KEY(StaffID)
 );
 -- drop TABLE Staff;
-
+-- alter table stafflist
+-- add parkinglotid char(6);
 -- 4)  ParkingLot:
 create TABLE ParkingLotList
 (
@@ -104,6 +115,8 @@ create TABLE CameraList
     PRIMARY KEY(CameraID, ParkingLotID)
 );
 
+-- alter table History
+-- add RFID char(12);
 -- alter TABLE cameralist
 -- add ParkingLotID CHAR(6);
 
@@ -112,6 +125,14 @@ create TABLE CameraList
 -- primary key(CameraID, ParkingLotID);
 -- drop CONSTRAINT  PK_CameraList_CameraID;
 
+-- create TABLE RFIDList
+-- (
+--     RFID    char(12),
+--     ParkingLotID char(6),
+--     BarCode char()
+-- );
+
+-- drop table rfidlist;
 insert into Parking
 (RFID, ParkingLotID, PlateNumber, PlateImgURL)
 VALUES
@@ -141,3 +162,28 @@ VALUES
     '92A99999',
     '/home/khoa/img'
 );
+
+
+-- Add foreign key:
+alter table stafflist
+add CONSTRAINT FK_STAFFLIST_PARKINGLOTLIST_ParkingLotID
+foreign key (ParkingLotID) REFERENCES ParkingLotList(ParkingLotID) ON DELETE CASCADE;
+
+alter table cameralist
+-- create TABLE RFIDList
+-- (
+--     RFID    char(12),
+--     ParkingLotID char(6),
+--     BarCode char()
+-- );
+add CONSTRAINT FK_CAMERALIST_PARKINGLOTLIST_ParkingLotID
+foreign key (ParkingLotID) REFERENCES ParkingLotList(ParkingLotID) ON DELETE CASCADE;
+
+alter table rfidlist
+add CONSTRAINT FK_RFIDLIST_PARKINGLOTLIST_ParkingLotID
+foreign key (ParkingLotID) REFERENCES ParkingLotList(ParkingLotID) ON DELETE CASCADE;
+
+
+-- foreign key 2 core tables: parking & history
+alter table parking
+add CONSTRAINT
