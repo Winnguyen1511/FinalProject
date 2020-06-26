@@ -23,7 +23,8 @@ class Ui_MainWindow(object):
         self.lbEntranceImg.setStyleSheet("padding: 6px;\n"
 "background-color: rgba(37, 41, 52, 0.9);")
         self.lbEntranceImg.setText("")
-        self.lbEntranceImg.setPixmap(QtGui.QPixmap("0.jpg"))
+        # self.lbEntranceImg.setPixmap(QtGui.QPixmap("0.jpg"))
+        self.lbEntranceImg.setPixmap(QtGui.QPixmap(""))
         self.lbEntranceImg.setScaledContents(True)
         self.lbEntranceImg.setObjectName("lbEntranceImg")
         self.lbEntranceTxt = QtWidgets.QLabel(self.centralwidget)

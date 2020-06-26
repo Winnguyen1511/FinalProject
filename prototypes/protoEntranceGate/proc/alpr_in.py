@@ -102,57 +102,70 @@ def main():
     # p = Process(target=MainWindow.show, args=())
     # p.start()
     MainWindow.show()
-    #Init the system:
-    res = sysLogin()
-    if res == False:
-        print('> Login failed!')
-        return False
-    
-    #Connect to database:
-    res, conn, cur= psq.login_database_Default()
-    if res == False:
-        print('> Connect database failed!')
-        return False
-
-    #Load model for AI modules:
-    yoloPlate, characterRecognition = pr.sysInit_Default()
-    
-    os.chdir(DEFAULT_WORKSPACE)
-    lstImg = [name for name in os.listdir() if name.endswith('.jpg') 
-                                            or name.endswith('.jpeg')
-                                            or name.endswith('.png')
-                                            or name.endswith('.raw')]
-    
-    parking = ParkingTable(conn, cur)
-    history = HistoryTable(conn,cur)
+    exit_status = False
     def running_thread_func():
+        if exit_status == True:
+            return True
+        #Init the system:
+        res = sysLogin()
+        if res == False:
+            print('> Login failed!')
+            return False
+        
+        #Connect to database:
+        res, conn, cur= psq.login_database_Default()
+        if res == False:
+            print('> Connect database failed!')
+            return False
+
+        #Load model for AI modules:
+        yoloPlate, characterRecognition = pr.sysInit_Default()
+        
+        os.chdir(DEFAULT_WORKSPACE)
+        lstImg = [name for name in os.listdir() if name.endswith('.jpg') 
+                                                or name.endswith('.jpeg')
+                                                or name.endswith('.png')
+                                                or name.endswith('.raw')]
+        
+        parking = ParkingTable(conn, cur)
+        history = HistoryTable(conn,cur)
         for imgName in lstImg:
             global semaphore
             # Load image, recognize the plate number:
             # choice = input('> Press [ENTER] to load img:')
+            ui.lbPlateNumberDesc.setText('Press [Enter]')
             print('> Press [ENTER] to load img:')
             state = SCAN_STATE
             semaphore = 0
             while semaphore == 0:
+                if exit_status == True:
+                    return True
                 print('.')
                 time.sleep(1)
             # if choice == '0':
             #     print('> Exiting...')
             #     break
             RFID = getRFID()
+            ui.lbRFIDDesc.setText(RFID)
             PlateImgURL = getImg(imgName,ui,  show=True)
             _,PlateNumber = pr.plateRecog(PlateImgURL, yoloPlate, characterRecognition, show=False)
+            ui.lbPlateNumberDesc.setText(PlateNumber)
             ParkingLotID = getParkingLotID()
+            ui.lbParkingLotDesc.setText(ParkingLotID)
             CheckInTime = DT.now()
             StaffID = getStaffID()
+            ui.lbStaffDesc.setText(StaffID)
             # print(StaffID)
             CameraID = getCameraID()
+            ui.lbCameraDesc.setText(CameraID)
             # cv2.waitKey(0)
             state = DATABASE_STATE
             # choice = input('> Press [ENTER] to allow vehicles in:')
             print('> Press [ENTER] to allow vehicles in:')
             semaphore = 0
             while semaphore == 0:
+                if exit_status == True:
+                    return True
                 print('.')
                 time.sleep(1)
 
@@ -172,15 +185,24 @@ def main():
                     print('> Cannot add history')
                 else:
                     print('> Inserted History')
+            ui.lbEntranceImg.setPixmap(QtGui.QPixmap(""))
+            ui.lbPlateNumberDesc.setText('Press [Enter]')
+
     t = threading.Thread(target=running_thread_func)
+    # t2 = threading.Thread(target=app.exec_)
     t.start()
-    sys.exit(app.exec_())
+    app.exec_()
+    exit_status = True
+    # t2.start()
+    
+    # time.sleep(1000)
+    # t.join()
+    
     # print(yoloPlate)
     # print(characterRecognition)
 
 
 if __name__ == '__main__':
-    
     main()
     
     
