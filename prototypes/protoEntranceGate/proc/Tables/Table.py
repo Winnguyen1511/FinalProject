@@ -18,15 +18,15 @@ def parkingLotIDValid(parkingLotID):
         return False
     return True
 def staffIDValid(staffID):
-    print(type(staffID))
-    if not isinstance(staffID, str):
-        print('> Error: Invalid data type')
-        return False
-    length = len(staffID)
-    if length != 6:
-        print('> Error: Invalid data lenght')
-        print('> Require len=6 but got len=%d',length)
-        return False
+    # print(type(staffID))
+    # if not isinstance(staffID, str):
+    #     print('> Error: Invalid data type')
+    #     return False
+    # length = len(staffID)
+    # if length != 6:
+    #     print('> Error: Invalid data lenght')
+    #     print('> Require len=6 but got len=%d',length)
+    #     return False
     return True
 
 def cameraIDValid(cameraID):
