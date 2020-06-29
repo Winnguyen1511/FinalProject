@@ -131,12 +131,6 @@ def main():
     else:
         host = psq.DEFAULT_HOST
 
-    ret, conn, cur = psq.login_database(database, username, password, host, port)
-    if ret:
-        print('> Logged in successful to <%s>'%(username))
-    else:
-        print('> Error: Log in error to <%s>'%(username))
-
     #Init GUI: 
     import sys
     app = QtWidgets.QApplication(sys.argv)
@@ -162,10 +156,11 @@ def main():
             return False
         
         #Connect to database:
-        res, conn, cur= psq.login_database_Default()
-        if res == False:
-            print('> Connect database failed!')
-            return False
+        ret, conn, cur = psq.login_database(database, username, password, host, port)
+        if ret:
+            print('> Logged in successful to <%s>'%(username))
+        else:
+            print('> Error: Log in error to <%s>'%(username))
 
         #Load model for AI modules:
         yoloPlate, characterRecognition = pr.sysInit_Default()
@@ -190,7 +185,7 @@ def main():
                 if exit_status == True:
                     return True
                 print('.')
-                time.sleep(1)
+                time.sleep(3)
             # if choice == '0':
             #     print('> Exiting...')
             #     break
@@ -200,6 +195,8 @@ def main():
             _,PlateNumber = pr.plateRecog(PlateImgURL, yoloPlate, characterRecognition, show=False)
             ui.lbPlateNumberDesc.setText(PlateNumber)
             ParkingLotID = getParkingLotID()
+
+            print('Plate number:', PlateNumber)
             ui.lbParkingLotDesc.setText(ParkingLotID)
             CheckInTime = DT.now()
             StaffID = getStaffID()
@@ -216,7 +213,7 @@ def main():
                 if exit_status == True:
                     return True
                 print('.')
-                time.sleep(1)
+                time.sleep(3)
 
             # cv2.destroyAllWindows()
             # if choice == '0':
