@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5.QtWidgets import QMessageBox
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -75,13 +75,15 @@ class Ui_MainWindow(object):
         self.hLayRFID.setObjectName("hLayRFID")
         self.hLayPlateNumber = QtWidgets.QHBoxLayout()
         self.hLayPlateNumber.setObjectName("hLayPlateNumber")
+        self.hLayNotification = QtWidgets.QHBoxLayout()
+        self.hLayNotification.setObjectName("hLayNotification")
 
         self.verticalLayout.addLayout(self.hLayStaff)
         self.verticalLayout.addLayout(self.hLayParkingLot)
         self.verticalLayout.addLayout(self.hLayCamera)
         self.verticalLayout.addLayout(self.hLayRFID)
         self.verticalLayout.addLayout(self.hLayPlateNumber)
-
+        self.verticalLayout.addLayout(self.hLayNotification)
         #Add Label to Information Horizontal Layouts:
         font = QtGui.QFont()
         font.setPointSize(14)
@@ -126,7 +128,13 @@ class Ui_MainWindow(object):
         self.lbPlateNumberDesc.setFixedHeight(55)
         self.lbPlateNumberDesc.setFont(font)
         self.lbPlateNumberDesc.setStyleSheet(lbTxtStyle)
-        
+        self.lbNotification = QtWidgets.QLabel(self.verticalLayoutWidget)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.lbNotification.setFont(font)
+        self.lbNotification.setStyleSheet(lbTxtStyle)
+
+
         self.hLayStaff.addWidget(self.lbStaff)
         self.hLayStaff.addWidget(self.lbStaffDesc)
 
@@ -142,6 +150,7 @@ class Ui_MainWindow(object):
         self.hLayPlateNumber.addWidget(self.lbPlateNumber)
         self.hLayPlateNumber.addWidget(self.lbPlateNumberDesc)
 
+        self.hLayNotification.addWidget(self.lbNotification)
         ################################################################
         ## Buttons:
         font = QtGui.QFont()
@@ -207,6 +216,27 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def setNotifications(self, notifications):
+        self.lbNotification.setText(notifications)
+
+    def msg_box(self,text='', msg_type='error', detail=''):
+        msg = QMessageBox()
+        msg_type = msg_type.upper()
+
+        if msg_type == 'ERROR':
+                title = msg_type
+                icon = QMessageBox.Critical
+                buttons = QMessageBox.Ok
+        ## More msg_type here:
+
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setIcon(icon)
+        msg.setStandardButtons(buttons)
+        msg.setDetailedText(detail)
+        msg.exec_()
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate

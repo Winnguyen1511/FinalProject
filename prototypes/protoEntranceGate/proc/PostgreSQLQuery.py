@@ -5,25 +5,33 @@ from datetime import datetime as DT
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '5432'
 DEFAULT_USERNAME = 'winnguyen'
-DEFAULT_PASSWORD = 'khoanguyen1511dn..'
+DEFAULT_PASSWORD = 'khoanguyen1511dn.'
 DEFAULT_DATABASE = 'parkinglotdatabase'
 
 def login_database_Default():
-    conn = psycopg2.connect(database=DEFAULT_DATABASE, user=DEFAULT_USERNAME,
-                            password=DEFAULT_PASSWORD, host=DEFAULT_HOST, port=DEFAULT_PORT)
-    cur = conn.cursor()
-    cur.execute('Select version()')
-    version = cur.fetchone()
-    print('> PostgreSQL version: ',version)
+    try:
+        conn = psycopg2.connect(database=DEFAULT_DATABASE, user=DEFAULT_USERNAME,
+                                password=DEFAULT_PASSWORD, host=DEFAULT_HOST, port=DEFAULT_PORT)
+        cur = conn.cursor()
+        cur.execute('Select version()')
+        version = cur.fetchone()
+        print('> PostgreSQL version: ',version)
+    except Exception as e:
+        print('> Error...')
+        return e, None, None
     return True, conn, cur
 
 def login_database(database, username, password, host, port):
-    conn = psycopg2.connect(database=database, user=username,
-                            password=password, host=host, port=port)
-    cur = conn.cursor()
-    cur.execute('Select version()')
-    version = cur.fetchone()
-    print('> PostgreSQL version: ',version)
+    try: 
+        conn = psycopg2.connect(database=database, user=username,
+                                password=password, host=host, port=port)
+        cur = conn.cursor()
+        cur.execute('Select version()')
+        version = cur.fetchone()
+        print('> PostgreSQL version: ',version)
+    except Exception as e:
+        print('Error')
+        return e, None, None
     return True, conn, cur
 
 def main():
