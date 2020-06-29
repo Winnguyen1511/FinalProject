@@ -7,6 +7,8 @@ import cv2
 import math
 from datetime import datetime as DT
 import threading
+import argparse
+
 DEFAULT_WORKSPACE = os.getcwd()+ '/resources/'
 DEFAULT_SAVE_DIR = os.getcwd()+'/img/'
 
@@ -71,10 +73,49 @@ def main():
         return False
     
     #Connect to database:
-    res, conn, cur= psq.login_database_Default()
-    if res == False:
-        print('> Connect database failed!')
-        return False
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--database', help='Enter database!')
+    parser.add_argument('-U', '--username', help='Enter username!')
+    parser.add_argument('-W', '--password', help='Enter password!')
+    parser.add_argument('-p', '--port', help='Enter port!')
+    parser.add_argument('-H', '--host', help='Enter hostname!')
+    args = parser.parse_args()
+    if args.database:
+        database = args.database
+    else:
+        database = psq.DEFAULT_DATABASE
+    
+    if args.username:
+        username = args.username
+    else:
+        username = psq.DEFAULT_USERNAME
+
+    if args.password:
+        password = args.password
+    else:
+        password = psq.DEFAULT_PASSWORD
+    
+    if args.port:
+        port = args.port
+    else:
+        port = psq.DEFAULT_PORT
+    
+    if args.host:
+        host = args.host
+    else:
+        host = psq.DEFAULT_HOST
+
+    ret, conn, cur = psq.login_database(database, username, password, host, port)
+    if ret:
+        print('> Logged in successful to <%s>'%(username))
+    else:
+        print('> Error: Log in error to <%s>'%(username))
+
+
+    # res, conn, cur= psq.login_database_Default()
+    # if res == False:
+    #     print('> Connect database failed!')
+    #     return False
 
     #Load model for AI modules:
     yoloPlate, characterRecognition = pr.sysInit_Default()
