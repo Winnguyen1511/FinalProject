@@ -121,7 +121,7 @@ class Ui_MainWindow(object):
         self.lbPlateNumber = QtWidgets.QLabel(self.verticalLayoutWidget)
         self.lbPlateNumber.setStyleSheet(lbStyle)
         self.lbPlateNumber.setFont(font)
-        self.lbPlateNumberDesc = QtWidgets.QLabel(self.verticalLayoutWidget)
+        self.lbPlateNumberDesc = QtWidgets.QLineEdit(self.verticalLayoutWidget)
         self.lbPlateNumberDesc.setFont(font)
         self.lbPlateNumberDesc.setStyleSheet(lbTxtStyle)
         

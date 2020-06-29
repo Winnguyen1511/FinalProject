@@ -174,6 +174,8 @@ def main():
             #     print('> Canceled!')
             #     continue
             # Insert to ParkingTable:
+            PlateNumber = ui.lbPlateNumberDesc.text()
+
             res = parking.insert(RFID, ParkingLotID, PlateNumber, PlateImgURL, CheckInTime)
             if res != True:
                 print('> Cannot allow vehicles to come in <%s> parking lot'%(ParkingLotID))    
