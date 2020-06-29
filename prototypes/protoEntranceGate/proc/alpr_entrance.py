@@ -88,7 +88,7 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         lbStyle = "background-color:rgba(37, 41, 52, 0.9);color: aliceblue; padding-left:10px;margin-top:2px;"
-        lbTxtStyle="background-color:#f5f5f5;"
+        lbTxtStyle="background-color:#f5f5f5; padding-left:5px;"
         self.lbStaff = QtWidgets.QLabel(self.verticalLayoutWidget)
         self.lbStaff.setFont(font)
         self.lbStaff.setStyleSheet(lbStyle)
@@ -122,6 +122,8 @@ class Ui_MainWindow(object):
         self.lbPlateNumber.setStyleSheet(lbStyle)
         self.lbPlateNumber.setFont(font)
         self.lbPlateNumberDesc = QtWidgets.QLineEdit(self.verticalLayoutWidget)
+        self.lbPlateNumberDesc.setFixedWidth(127)
+        self.lbPlateNumberDesc.setFixedHeight(55)
         self.lbPlateNumberDesc.setFont(font)
         self.lbPlateNumberDesc.setStyleSheet(lbTxtStyle)
         
