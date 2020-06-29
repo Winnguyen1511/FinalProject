@@ -7,7 +7,21 @@ import cv2
 import math
 from datetime import datetime as DT
 import threading
+from PyQt5 import QtCore, QtGui, QtWidgets
+import alpr_entrance as AE
+from PyQt5.QtGui import QImage, QPixmap
+from multiprocessing import Process
+import time
 import argparse
+
+
+INIT_STATE = 0
+SCAN_STATE = 1
+DATABASE_STATE = 2
+
+semaphore = 0
+
+state = INIT_STATE
 
 DEFAULT_WORKSPACE = os.getcwd()+ '/resources/'
 DEFAULT_SAVE_DIR = os.getcwd()+'/img/'
@@ -44,17 +58,29 @@ def imshow(im):
     tmp = cv2.resize(im, (w, h), interpolation=cv2.INTER_CUBIC)
     cv2.imshow('Plate in', tmp)
     cv2.waitKey(0)
-def getImg(imgName, show=True):
+
+def getImg(imgName,UI,  show=True):
     im = cv2.imread(imgName)
     if show == True:
-        t = threading.Thread(target=imshow, args=(im,))
-        t.start()
+        w = im.shape[1]
+        h = im.shape[0]
+        im_tmp = QImage(im.data, w,h, QImage.Format_RGB888).rgbSwapped()
+        UI.lbEntranceImg.setPixmap(QPixmap.fromImage(im_tmp))
         # imshow(im)
     saveName = DEFAULT_SAVE_DIR +'in_'+ imgName
     if not os.path.isdir(DEFAULT_SAVE_DIR):
         os.mkdir(DEFAULT_SAVE_DIR)
     cv2.imwrite(saveName, im)
     return saveName
+
+def btnEnterCallback():
+    print('> Enter...')
+    global semaphore
+    semaphore = 1
+
+skip_plate = False
+def btnSkipCallback():
+    pass
 
 def sysLogin():
     #Simulate loging process
@@ -111,59 +137,123 @@ def main():
     else:
         print('> Error: Log in error to <%s>'%(username))
 
+    #Init GUI: 
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = AE.Ui_MainWindow()
+    ui.setupUi(MainWindow)
 
-    # res, conn, cur= psq.login_database_Default()
-    # if res == False:
-    #     print('> Connect database failed!')
-    #     return False
+    ui.btnEnter.clicked.connect(btnEnterCallback)
+    ui.btnSkip.clicked.connect(btnSkipCallback)
+    # t = threading.Thread(target=MainWindow.show)
+    # t.start()
+    # p = Process(target=MainWindow.show, args=())
+    # p.start()
+    MainWindow.show()
+    exit_status = False
+    def running_thread_func():
+        if exit_status == True:
+            return True
+        #Init the system:
+        res = sysLogin()
+        if res == False:
+            print('> Login failed!')
+            return False
+        
+        #Connect to database:
+        res, conn, cur= psq.login_database_Default()
+        if res == False:
+            print('> Connect database failed!')
+            return False
 
-    #Load model for AI modules:
-    yoloPlate, characterRecognition = pr.sysInit_Default()
-    
-    os.chdir(DEFAULT_WORKSPACE)
-    lstImg = [name for name in os.listdir() if name.endswith('.jpg') 
-                                            or name.endswith('.jpeg')
-                                            or name.endswith('.png')
-                                            or name.endswith('.raw')]
-    
-    parking = ParkingTable(conn, cur)
-    history = HistoryTable(conn,cur)
-    for imgName in lstImg:
-        # Load image, recognize the plate number:
-        choice = input('> Press [ENTER] to load img:')
-        if choice == '0':
-            print('> Exiting...')
-            break
-        RFID = getRFID()
-        PlateImgURL = getImg(imgName, show=True)
-        _,PlateNumber = pr.plateRecog(PlateImgURL, yoloPlate, characterRecognition, show=False)
-        ParkingLotID = getParkingLotID()
-        CheckInTime = DT.now()
-        StaffID = getStaffID()
-        print(StaffID)
-        CameraID = getCameraID()
-        # cv2.waitKey(0)
-        choice = input('> Press [ENTER] to allow vehicles in:')
-        cv2.destroyAllWindows()
-        if choice == '0':
-            print('> Canceled!')
-            continue
-        # Insert to ParkingTable:
-        res = parking.insert(RFID, ParkingLotID, PlateNumber, PlateImgURL, CheckInTime)
-        if res != True:
-            print('> Cannot allow vehicles to come in <%s> parking lot'%(ParkingLotID))    
-        else:
-            print('> Inserted parking')
-            # Insert to HistoryTable: 
-            res = history.insert(RFID, ParkingLotID, PlateNumber, PlateImgURL, StaffID, CameraID, True, CheckInTime)
+        #Load model for AI modules:
+        yoloPlate, characterRecognition = pr.sysInit_Default()
+        
+        os.chdir(DEFAULT_WORKSPACE)
+        lstImg = [name for name in os.listdir() if name.endswith('.jpg') 
+                                                or name.endswith('.jpeg')
+                                                or name.endswith('.png')
+                                                or name.endswith('.raw')]
+        
+        parking = ParkingTable(conn, cur)
+        history = HistoryTable(conn,cur)
+        for imgName in lstImg:
+            global semaphore
+            # Load image, recognize the plate number:
+            # choice = input('> Press [ENTER] to load img:')
+            ui.lbPlateNumberDesc.setText('Press [Enter]')
+            print('> Press [ENTER] to load img:')
+            state = SCAN_STATE
+            semaphore = 0
+            while semaphore == 0:
+                if exit_status == True:
+                    return True
+                print('.')
+                time.sleep(1)
+            # if choice == '0':
+            #     print('> Exiting...')
+            #     break
+            RFID = getRFID()
+            ui.lbRFIDDesc.setText(RFID)
+            PlateImgURL = getImg(imgName,ui,  show=True)
+            _,PlateNumber = pr.plateRecog(PlateImgURL, yoloPlate, characterRecognition, show=False)
+            ui.lbPlateNumberDesc.setText(PlateNumber)
+            ParkingLotID = getParkingLotID()
+            ui.lbParkingLotDesc.setText(ParkingLotID)
+            CheckInTime = DT.now()
+            StaffID = getStaffID()
+            ui.lbStaffDesc.setText(StaffID)
+            # print(StaffID)
+            CameraID = getCameraID()
+            ui.lbCameraDesc.setText(CameraID)
+            # cv2.waitKey(0)
+            state = DATABASE_STATE
+            # choice = input('> Press [ENTER] to allow vehicles in:')
+            print('> Press [ENTER] to allow vehicles in:')
+            semaphore = 0
+            while semaphore == 0:
+                if exit_status == True:
+                    return True
+                print('.')
+                time.sleep(1)
+
+            # cv2.destroyAllWindows()
+            # if choice == '0':
+            #     print('> Canceled!')
+            #     continue
+            # Insert to ParkingTable:
+            PlateNumber = ui.lbPlateNumberDesc.text()
+
+            res = parking.insert(RFID, ParkingLotID, PlateNumber, PlateImgURL, CheckInTime)
             if res != True:
-                print('> Cannot add history')
+                print('> Cannot allow vehicles to come in <%s> parking lot'%(ParkingLotID))    
             else:
-                print('> Inserted History')
+                print('> Inserted parking')
+                # Insert to HistoryTable: 
+                res = history.insert(RFID, ParkingLotID, PlateNumber, PlateImgURL, StaffID, CameraID, True, CheckInTime)
+                if res != True:
+                    print('> Cannot add history')
+                else:
+                    print('> Inserted History')
+            ui.lbEntranceImg.setPixmap(QtGui.QPixmap(""))
+            ui.lbPlateNumberDesc.setText('Press [Enter]')
 
+    t = threading.Thread(target=running_thread_func)
+    # t2 = threading.Thread(target=app.exec_)
+    t.start()
+    app.exec_()
+    exit_status = True
+    # t2.start()
+    
+    # time.sleep(1000)
+    # t.join()
+    
     # print(yoloPlate)
     # print(characterRecognition)
 
 
 if __name__ == '__main__':
     main()
+    
+    
