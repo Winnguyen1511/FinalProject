@@ -12,6 +12,9 @@ import alpr_entrance as AE
 from PyQt5.QtGui import QImage, QPixmap
 from multiprocessing import Process
 import time
+import argparse
+
+
 INIT_STATE = 0
 SCAN_STATE = 1
 DATABASE_STATE = 2
@@ -89,12 +92,52 @@ def getCameraID():
     return 'CM0001'
 
 def main():
+    #Init the system:
+    res = sysLogin()
+    if res == False:
+        print('> Login failed!')
+        return False
+    
+    #Connect to database:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--database', help='Enter database!')
+    parser.add_argument('-U', '--username', help='Enter username!')
+    parser.add_argument('-W', '--password', help='Enter password!')
+    parser.add_argument('-p', '--port', help='Enter port!')
+    parser.add_argument('-H', '--host', help='Enter hostname!')
+    args = parser.parse_args()
+    if args.database:
+        database = args.database
+    else:
+        database = psq.DEFAULT_DATABASE
+    
+    if args.username:
+        username = args.username
+    else:
+        username = psq.DEFAULT_USERNAME
+
+    if args.password:
+        password = args.password
+    else:
+        password = psq.DEFAULT_PASSWORD
+    
+    if args.port:
+        port = args.port
+    else:
+        port = psq.DEFAULT_PORT
+    
+    if args.host:
+        host = args.host
+    else:
+        host = psq.DEFAULT_HOST
+
     #Init GUI: 
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = AE.Ui_MainWindow()
     ui.setupUi(MainWindow)
+
     ui.btnEnter.clicked.connect(btnEnterCallback)
     ui.btnSkip.clicked.connect(btnSkipCallback)
     # t = threading.Thread(target=MainWindow.show)
@@ -113,10 +156,11 @@ def main():
             return False
         
         #Connect to database:
-        res, conn, cur= psq.login_database_Default()
-        if res == False:
-            print('> Connect database failed!')
-            return False
+        ret, conn, cur = psq.login_database(database, username, password, host, port)
+        if ret:
+            print('> Logged in successful to <%s>'%(username))
+        else:
+            print('> Error: Log in error to <%s>'%(username))
 
         #Load model for AI modules:
         yoloPlate, characterRecognition = pr.sysInit_Default()
@@ -141,7 +185,7 @@ def main():
                 if exit_status == True:
                     return True
                 print('.')
-                time.sleep(1)
+                time.sleep(3)
             # if choice == '0':
             #     print('> Exiting...')
             #     break
@@ -151,6 +195,8 @@ def main():
             _,PlateNumber = pr.plateRecog(PlateImgURL, yoloPlate, characterRecognition, show=False)
             ui.lbPlateNumberDesc.setText(PlateNumber)
             ParkingLotID = getParkingLotID()
+
+            print('Plate number:', PlateNumber)
             ui.lbParkingLotDesc.setText(ParkingLotID)
             CheckInTime = DT.now()
             StaffID = getStaffID()
@@ -167,7 +213,7 @@ def main():
                 if exit_status == True:
                     return True
                 print('.')
-                time.sleep(1)
+                time.sleep(3)
 
             # cv2.destroyAllWindows()
             # if choice == '0':
