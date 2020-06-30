@@ -144,7 +144,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = AG.Ui_MainWindow()
-    ui.setupUi(MainWindow)
+    ui.setupUi(MainWindow, 'Entrance Gate')
 
     ui.btnEnter.clicked.connect(btnEnterCallback)
     ui.btnSkip.clicked.connect(btnSkipCallback)
