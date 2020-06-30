@@ -104,7 +104,7 @@ def sysLogin():
     print('> Logged in!')
     return True
 def getStaffID():
-    return 'STF002'
+    return "STF002"
 def getCameraID():
     return 'CM0002'
 
@@ -159,9 +159,7 @@ def main():
     ui.btnSkip.clicked.connect(btnSkipCallback)
     
     MainWindow.show()
-    # global exit_status
     exit_status = False
-    # error_status = False
     # The AI Core Thread:
     ui.setNotifications('Initializing. Please wait...')
     class AIThread(QThread):
@@ -215,7 +213,6 @@ def main():
             CameraID = getCameraID()
             ui.lbCameraDesc.setText(CameraID)
 
-
             for imgName in lstImg:
                 global semaphore, skip_plate, state
                 # Load image, recognize the plate number:
@@ -231,8 +228,7 @@ def main():
                 while semaphore == 0:
                     if exit_status == True:
                         return True
-                    # print('.')
-                    # time.sleep(3)
+
                 ui.setNotifications('Please wait...')
                 RFID = getRFID()
                 ui.lbRFIDDesc.setText(RFID)
@@ -266,7 +262,6 @@ def main():
                 CheckInTime = DT.now()
                 
                 state = DATABASE_STATE
-                # choice = input('> Press [ENTER] to allow vehicles in:')
                 
                 if inPlateNumber == outPlateNumber:
                     print('> Plate Number matched!')
@@ -296,7 +291,6 @@ def main():
                 # Insert to ParkingTable:
                 outPlateNumber = ui.lbPlateNumberDesc.text()
 
-                # res = parking.insert(RFID, ParkingLotID, outPlateNumber, outPlateImgURL, CheckInTime)
                 res = parking.delete(RFID, ParkingLotID)
                 if res != True:
                     print('> Cannot allow vehicles to come OUT <%s> parking lot'%(ParkingLotID))    
@@ -310,8 +304,7 @@ def main():
                         print('> Inserted History')
                 
                 ui.lbPlateNumberDesc.setText('Press [Enter]')
-    # ui.connect(running_thread_func, SIGNAL('Exit_val'), app.exit())
-    # t = threading.Thread(target=running_thread_func)
+
     t = AIThread()
     t.start()
     app.exec_()
