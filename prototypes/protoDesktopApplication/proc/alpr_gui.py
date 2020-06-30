@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QDesktopWidget
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
 
@@ -22,10 +22,16 @@ class Ui_MainWindow(object):
             # before users choose to close the application.
             terminate_sig = pyqtSignal(str, str, str)
 
-    def setupUi(self, MainWindow, name='MainWindow'):
-        
+    def setupUi(self, MainWindow, name='MainWindow'):  
+
         MainWindow.setObjectName(name)
         MainWindow.resize(942, 529)
+        qr = MainWindow.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        MainWindow.move(qr.topLeft())
+
+
         MainWindow.setStyleSheet("")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
