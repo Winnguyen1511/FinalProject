@@ -16,17 +16,18 @@ from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
 class Ui_MainWindow(object):
 
-    class testSignalClass(QObject):
-            test_sig = pyqtSignal()
     class terminateSignalClass(QObject):
+            ## This signal is connected with the msg_box:
+            # msg_box will display some information
+            # before users choose to close the application.
             terminate_sig = pyqtSignal(str, str, str)
 
     def setupUi(self, MainWindow):
-        # self.sig = self.testSignalClass()
-        # self.sig.test_sig.connect(self.msg_box)
-
+        # Termination handling:
         self.sig = self.terminateSignalClass()
         self.sig.terminate_sig.connect(self.msg_box)
+
+        ## Save the main window for exit handling:
         self.MainWindow = MainWindow
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(942, 529)
@@ -277,29 +278,6 @@ class Ui_MainWindow(object):
         if ret == quitButton:
                 ## Close immediately the main window:
                 self.MainWindow.close()
-        # self.quit()
-# class TerminateClass(QThread):
-#         def __init__(self,parent=None):
-#                 super(TerminateClass, self).__init__(parent)
-#         def run(self):
-#                 pass
-class MessageBox(QMessageBox):
-        def __init__(self,text='', msg_type='error', detail=''):
-                super().__init__()
-                msg_type = msg_type.upper()
-                if msg_type == 'ERROR':
-                        title = msg_type
-                        icon = QMessageBox.Critical
-                        buttons = QMessageBox.Ok
-                ## More msg_type here:
-
-                self.setWindowTitle(title)
-                self.setText(text)
-                self.setIcon(icon)
-                self.setStandardButtons(buttons)
-                self.setDetailedText(detail)
-
-
 
 if __name__ == "__main__":
     import sys

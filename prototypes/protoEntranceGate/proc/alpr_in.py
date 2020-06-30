@@ -171,22 +171,11 @@ def main():
                 print('> Logged in successful to <%s>'%(username))
             else:
                 print('> Error: Log in error to <%s>'%(username))
-                # self.emit()
-                # msg_box = QMessageBox()
-                # msg_box.setText('Test')
-                # msg_box.exec_()
-                # ui.msg_box('Error: Log in error to <'+username+'>', detail=str(ret))
-                # error_msg_box = AE.MessageBox('Error: Log in error to <'+username+'>', detail=str(ret))
-                # error_msg_box.exec_()
-                # while True:
-                #     ui.sig.test_sig.emit()
-                #     time.sleep(1)
+                ## Emit signal for the Message Box:
+                # Ready for termination.
                 ui.sig.terminate_sig.emit('Error: Log in error to <'+username+'>', 'error',str(ret) )
-                # app.quit()
+
                 print('>Exit...')
-                # error_status = True
-                ## Quit the app immediately.
-                # MainWindow.close()
                 return False
             parking = ParkingTable(conn, cur)
             history = HistoryTable(conn,cur)
@@ -196,11 +185,9 @@ def main():
             yoloPlate, characterRecognition = pr.sysInit_Default()
             if yoloPlate == False:
                 print('> Error: loading database for AI Core')
-                # ui.msg_box('> Error: loading database for AI Core', detail=str(characterRecognition))
+                ## Emit signal for the Message Box:
+                # Ready for termination.
                 ui.sig.terminate_sig.emit('> Error: loading database for AI Core', 'error',str(characterRecognition) )
-                # app.quit()
-                # MainWindow.close()
-                # error_status = True
                 return False
 
             os.chdir(DEFAULT_WORKSPACE)
