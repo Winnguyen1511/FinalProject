@@ -59,7 +59,13 @@ def imshow(im):
     cv2.imshow('Plate in', tmp)
     cv2.waitKey(0)
 
-def getImg(imgName,UI,  show=True):
+def imshow(UILabel, im):
+    w = im.shape[1]
+    h = im.shape[0]
+    im_tmp = QImage(im.data, w,h, QImage.Format_RGB888).rgbSwapped()
+    UILabel.setPixmap(QPixmap.fromImage(im_tmp))
+
+def getImg(imgName,UI=None,  show=True):
     #Simulate the image read from camera,
     #Here we just get img from a directory:
     im = cv2.imread(imgName)
@@ -95,9 +101,9 @@ def sysLogin():
     print('> Logged in!')
     return True
 def getStaffID():
-    return 'STF001'
+    return 'STF002'
 def getCameraID():
-    return 'CM0001'
+    return 'CM0002'
 
 def main():
     #Init the system:
@@ -211,6 +217,7 @@ def main():
                 global semaphore, skip_plate, state
                 # Load image, recognize the plate number:
                 ui.lbEntranceImg.setPixmap(QtGui.QPixmap(""))
+                ui.lbEntranceImg_2.setPixmap(QtGui.QPixmap(""))
                 ui.lbRFIDDesc.setText("")
 
                 ui.lbPlateNumberDesc.setText('Press [Enter]')
@@ -226,19 +233,47 @@ def main():
                 ui.setNotifications('Please wait...')
                 RFID = getRFID()
                 ui.lbRFIDDesc.setText(RFID)
-                PlateImgURL = getImg(imgName,ui,  show=True)
-                _,PlateNumber = pr.plateRecog(PlateImgURL, yoloPlate, characterRecognition, show=False)
-                ui.lbPlateNumberDesc.setText(PlateNumber)
+
+                ###############################################################
+                ## Retrive Plate number from the database:
+                columns= 'platenumber, plateimgurl'
+                conditions = "rfid='"+RFID+"' and parkinglotid='"+ParkingLotID+"'"
+                records = parking.select(columns,conditions)
+                if len(records) == 0:
+                    print('> Cannot find any match <rfid:%s> in <%s>'%(RFID,ParkingLotID))
+                    continue
+
+                inPlateNumber = records[0][0]
+                print('in:'+inPlateNumber)
+                inPlateImgURL = records[0][1]
                 
-                print('Plate number:', PlateNumber)
+                inImg = cv2.imread(inPlateImgURL)
+                outImg = cv2.imread(imgName)
+                outPlateImgURL = getImg(imgName, ui, show=False)
+
+                _,outPlateNumber = pr.plateRecog(imgName, yoloPlate, characterRecognition, show=False)
+
+                imshow(ui.lbEntranceImg, inImg)
+                imshow(ui.lbEntranceImg_2, outImg)
+
+                ui.lbPlateNumberDesc.setText(outPlateNumber)
+                
+                print('out:', outPlateNumber)
                 
                 CheckInTime = DT.now()
                 
                 state = DATABASE_STATE
                 # choice = input('> Press [ENTER] to allow vehicles in:')
+                
+                if inPlateNumber == outPlateNumber:
+                    print('> Plate Number matched!')
+                    message = '> Plate Number matched!'
+                else:
+                    print('> Plate Number NOT matched!')
+                    message = '> Plate Number NOT matched!'
                 print('> Press [ENTER] to allow vehicles in:')
-                ui.setNotifications('Please Check the plate number again\n'
-                'Press [ENTER] to allow vehicles in\n'
+                ui.setNotifications(message+'\nPlease Check the plate number again\n'
+                'Press [ENTER] to allow vehicles out\n'
                 'Press [SKIP] to reject vehicles')
                 semaphore = 0
                 while semaphore == 0:
@@ -250,21 +285,22 @@ def main():
                     # print('.')
                     # time.sleep(3)
                 if skip_plate == True:
-                    print('> Skipping plate <%s>'%(PlateNumber))
-                    ui.setNotifications('Skipped plate <'+PlateNumber+'>')
+                    print('> Skipping plate <%s>'%(outPlateNumber))
+                    ui.setNotifications('Skipped plate <'+outPlateNumber+'>')
                     skip_plate = False
                     continue
                 ui.setNotifications('Please wait...')
                 # Insert to ParkingTable:
-                PlateNumber = ui.lbPlateNumberDesc.text()
+                outPlateNumber = ui.lbPlateNumberDesc.text()
 
-                res = parking.insert(RFID, ParkingLotID, PlateNumber, PlateImgURL, CheckInTime)
+                # res = parking.insert(RFID, ParkingLotID, outPlateNumber, outPlateImgURL, CheckInTime)
+                res = parking.delete(RFID, ParkingLotID)
                 if res != True:
-                    print('> Cannot allow vehicles to come in <%s> parking lot'%(ParkingLotID))    
+                    print('> Cannot allow vehicles to come OUT <%s> parking lot'%(ParkingLotID))    
                 else:
-                    print('> Inserted parking')
+                    print('> Deleted parking')
                     # Insert to HistoryTable: 
-                    res = history.insert(RFID, ParkingLotID, PlateNumber, PlateImgURL, StaffID, CameraID, True, CheckInTime)
+                    res = history.insert(RFID, ParkingLotID, outPlateNumber, outPlateImgURL, StaffID, CameraID, False, CheckInTime)
                     if res != True:
                         print('> Cannot add history')
                     else:
