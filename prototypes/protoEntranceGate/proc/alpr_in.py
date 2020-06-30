@@ -13,8 +13,8 @@ from PyQt5.QtGui import QImage, QPixmap
 from multiprocessing import Process
 import time
 import argparse
-
-
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QThread
 INIT_STATE = 0
 SCAN_STATE = 1
 DATABASE_STATE = 2
@@ -155,121 +155,125 @@ def main():
     # error_status = False
     # The AI Core Thread:
     ui.setNotifications('Initializing. Please wait...')
-    def running_thread_func():
-        if exit_status == True:
-            return True
-        ###########################################################################
-        #Init the AI Core system:
-        
-        ## 1) Connect to database:
-        ret, conn, cur = psq.login_database(database, username, password, host, port)
-        if ret == True:
-            print('> Logged in successful to <%s>'%(username))
-        else:
-            print('> Error: Log in error to <%s>'%(username))
-            # ui.msg_box('Error: Log in error to <'+username+'>', detail=str(ret))
-            print('>Exit...')
-            # error_status = True
-            ## Quit the app immediately.
-            # MainWindow.close()
-            return False
-        parking = ParkingTable(conn, cur)
-        history = HistoryTable(conn,cur)
+    class AIThread(QThread):
+        def __init__(self):
+            super(AIThread, self).__init__()
 
-
-        ## 2) Load model for AI modules:
-        yoloPlate, characterRecognition = pr.sysInit_Default()
-        if yoloPlate == False:
-            print('> Error: loading database for AI Core')
-            # ui.msg_box('> Error: loading database for AI Core', detail=str(characterRecognition))
-            # app.quit()
-            # MainWindow.close()
-            # error_status = True
-            return False
-
-        os.chdir(DEFAULT_WORKSPACE)
-        ## 3) Simulate the data for recognition:
-        lstImg = [name for name in os.listdir() if name.endswith('.jpg') 
-                                                or name.endswith('.jpeg')
-                                                or name.endswith('.png')
-                                                or name.endswith('.raw')]
-        
-
-        ## 4) Get Information of the working session:
-        StaffID = getStaffID()
-        ui.lbStaffDesc.setText(StaffID)
-        ParkingLotID = getParkingLotID()
-        ui.lbParkingLotDesc.setText(ParkingLotID)
-        CameraID = getCameraID()
-        ui.lbCameraDesc.setText(CameraID)
-
-
-        for imgName in lstImg:
-            global semaphore, skip_plate, state
-            # Load image, recognize the plate number:
-            ui.lbEntranceImg.setPixmap(QtGui.QPixmap(""))
-            ui.lbRFIDDesc.setText("")
-
-            ui.lbPlateNumberDesc.setText('Press [Enter]')
-            print('> Press [ENTER] to load img:')
-            ui.setNotifications('Press [ENTER] to get new car.')
-            state = SCAN_STATE
-            semaphore = 0
-            while semaphore == 0:
-                if exit_status == True:
-                    return True
-                # print('.')
-                # time.sleep(3)
-            ui.setNotifications('Please wait...')
-            RFID = getRFID()
-            ui.lbRFIDDesc.setText(RFID)
-            PlateImgURL = getImg(imgName,ui,  show=True)
-            _,PlateNumber = pr.plateRecog(PlateImgURL, yoloPlate, characterRecognition, show=False)
-            ui.lbPlateNumberDesc.setText(PlateNumber)
+        def run(self):
+            if exit_status == True:
+                return True
+            ###########################################################################
+            #Init the AI Core system:
             
-            print('Plate number:', PlateNumber)
-            
-            CheckInTime = DT.now()
-            
-            state = DATABASE_STATE
-            # choice = input('> Press [ENTER] to allow vehicles in:')
-            print('> Press [ENTER] to allow vehicles in:')
-            ui.setNotifications('Please Check the plate number again\n'
-            'Press [ENTER] to allow vehicles in\n'
-            'Press [SKIP] to reject vehicles')
-            semaphore = 0
-            while semaphore == 0:
-                if skip_plate == True:
-                    # skip_plate = False
-                    break
-                if exit_status == True:
-                    return True
-                # print('.')
-                # time.sleep(3)
-            if skip_plate == True:
-                print('> Skipping plate <%s>'%(PlateNumber))
-                ui.setNotifications('Skipped plate <'+PlateNumber+'>')
-                skip_plate = False
-                continue
-            ui.setNotifications('Please wait...')
-            # Insert to ParkingTable:
-            PlateNumber = ui.lbPlateNumberDesc.text()
-
-            res = parking.insert(RFID, ParkingLotID, PlateNumber, PlateImgURL, CheckInTime)
-            if res != True:
-                print('> Cannot allow vehicles to come in <%s> parking lot'%(ParkingLotID))    
+            ## 1) Connect to database:
+            ret, conn, cur = psq.login_database(database, username, password, host, port)
+            if ret == True:
+                print('> Logged in successful to <%s>'%(username))
             else:
-                print('> Inserted parking')
-                # Insert to HistoryTable: 
-                res = history.insert(RFID, ParkingLotID, PlateNumber, PlateImgURL, StaffID, CameraID, True, CheckInTime)
+                print('> Error: Log in error to <%s>'%(username))
+                ## Emit signal for the Message Box:
+                # Ready for termination.
+                ui.sig.terminate_sig.emit('Error: Log in error to <'+username+'>', 'error',str(ret) )
+
+                print('>Exit...')
+                return False
+            parking = ParkingTable(conn, cur)
+            history = HistoryTable(conn,cur)
+
+
+            ## 2) Load model for AI modules:
+            yoloPlate, characterRecognition = pr.sysInit_Default()
+            if yoloPlate == False:
+                print('> Error: loading database for AI Core')
+                ## Emit signal for the Message Box:
+                # Ready for termination.
+                ui.sig.terminate_sig.emit('> Error: loading database for AI Core', 'error',str(characterRecognition) )
+                return False
+
+            os.chdir(DEFAULT_WORKSPACE)
+            ## 3) Simulate the data for recognition:
+            lstImg = [name for name in os.listdir() if name.endswith('.jpg') 
+                                                    or name.endswith('.jpeg')
+                                                    or name.endswith('.png')
+                                                    or name.endswith('.raw')]
+            
+
+            ## 4) Get Information of the working session:
+            StaffID = getStaffID()
+            ui.lbStaffDesc.setText(StaffID)
+            ParkingLotID = getParkingLotID()
+            ui.lbParkingLotDesc.setText(ParkingLotID)
+            CameraID = getCameraID()
+            ui.lbCameraDesc.setText(CameraID)
+
+
+            for imgName in lstImg:
+                global semaphore, skip_plate, state
+                # Load image, recognize the plate number:
+                ui.lbEntranceImg.setPixmap(QtGui.QPixmap(""))
+                ui.lbRFIDDesc.setText("")
+
+                ui.lbPlateNumberDesc.setText('Press [Enter]')
+                print('> Press [ENTER] to load img:')
+                ui.setNotifications('Press [ENTER] to get new car.')
+                state = SCAN_STATE
+                semaphore = 0
+                while semaphore == 0:
+                    if exit_status == True:
+                        return True
+                    # print('.')
+                    # time.sleep(3)
+                ui.setNotifications('Please wait...')
+                RFID = getRFID()
+                ui.lbRFIDDesc.setText(RFID)
+                PlateImgURL = getImg(imgName,ui,  show=True)
+                _,PlateNumber = pr.plateRecog(PlateImgURL, yoloPlate, characterRecognition, show=False)
+                ui.lbPlateNumberDesc.setText(PlateNumber)
+                
+                print('Plate number:', PlateNumber)
+                
+                CheckInTime = DT.now()
+                
+                state = DATABASE_STATE
+                # choice = input('> Press [ENTER] to allow vehicles in:')
+                print('> Press [ENTER] to allow vehicles in:')
+                ui.setNotifications('Please Check the plate number again\n'
+                'Press [ENTER] to allow vehicles in\n'
+                'Press [SKIP] to reject vehicles')
+                semaphore = 0
+                while semaphore == 0:
+                    if skip_plate == True:
+                        # skip_plate = False
+                        break
+                    if exit_status == True:
+                        return True
+                    # print('.')
+                    # time.sleep(3)
+                if skip_plate == True:
+                    print('> Skipping plate <%s>'%(PlateNumber))
+                    ui.setNotifications('Skipped plate <'+PlateNumber+'>')
+                    skip_plate = False
+                    continue
+                ui.setNotifications('Please wait...')
+                # Insert to ParkingTable:
+                PlateNumber = ui.lbPlateNumberDesc.text()
+
+                res = parking.insert(RFID, ParkingLotID, PlateNumber, PlateImgURL, CheckInTime)
                 if res != True:
-                    print('> Cannot add history')
+                    print('> Cannot allow vehicles to come in <%s> parking lot'%(ParkingLotID))    
                 else:
-                    print('> Inserted History')
-            
-            ui.lbPlateNumberDesc.setText('Press [Enter]')
-            
-    t = threading.Thread(target=running_thread_func)
+                    print('> Inserted parking')
+                    # Insert to HistoryTable: 
+                    res = history.insert(RFID, ParkingLotID, PlateNumber, PlateImgURL, StaffID, CameraID, True, CheckInTime)
+                    if res != True:
+                        print('> Cannot add history')
+                    else:
+                        print('> Inserted History')
+                
+                ui.lbPlateNumberDesc.setText('Press [Enter]')
+    # ui.connect(running_thread_func, SIGNAL('Exit_val'), app.exit())
+    # t = threading.Thread(target=running_thread_func)
+    t = AIThread()
     t.start()
     app.exec_()
     exit_status = True

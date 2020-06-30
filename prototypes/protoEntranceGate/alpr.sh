@@ -19,6 +19,7 @@ THIS_DIR=$PWD
 
 RESOURCE_DIR=$THIS_DIR/"resources/"
 IMG_DIR=$THIS_DIR/"img/"
+LOG_DIR=$THIS_DIR/"dberr_log/"
 WORKSPACE=$THIS_DIR/"resources/"
 SETUP=$THIS_DIR/"setup"
 UTILS_DIR=$THIS_DIR/"utils/"
@@ -105,6 +106,7 @@ clearFunction()
     rm -rf $RESOURCE_DIR
     rm -rf $SETUP/".credentials"
     rm -rf $IMG_DIR
+    rm -rf $LOG_DIR
 }
 renameFunction()
 {

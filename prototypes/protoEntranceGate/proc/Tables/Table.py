@@ -3,7 +3,7 @@ import psycopg2
 import os
 from datetime import datetime as DT
 
-logdir = 'log/'
+logdir = 'dberr_log/'
 
 def rfidValid(rfid):
     return True
