@@ -10,9 +10,18 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QThread, pyqtSignal, QObject
+
+
 
 class Ui_MainWindow(object):
+
+    class testSignalClass(QObject):
+            test_sig = pyqtSignal()
+
     def setupUi(self, MainWindow):
+        self.sig = self.testSignalClass()
+        self.sig.test_sig.connect(self.testSigFunc)
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(942, 529)
         MainWindow.setStyleSheet("")
@@ -220,24 +229,6 @@ class Ui_MainWindow(object):
     def setNotifications(self, notifications):
         self.lbNotification.setText(notifications)
 
-    def msg_box(self,text='', msg_type='error', detail=''):
-        msg = QMessageBox()
-        msg_type = msg_type.upper()
-
-        if msg_type == 'ERROR':
-                title = msg_type
-                icon = QMessageBox.Critical
-                buttons = QMessageBox.Ok
-        ## More msg_type here:
-
-        msg.setWindowTitle(title)
-        msg.setText(text)
-        msg.setIcon(icon)
-        msg.setStandardButtons(buttons)
-        msg.setDetailedText(detail)
-        msg.exec_()
-
-
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -255,6 +246,47 @@ class Ui_MainWindow(object):
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionNew.setText(_translate("MainWindow", "New.."))
         self.actionOpen.setText(_translate("MainWindow", "Open.."))
+    
+    def testSigFunc(self):
+        print('> Sig triggered...')
+
+    def msg_box(self,text='', msg_type='error', detail=''):
+        msg = QMessageBox()
+        msg_type = msg_type.upper()
+
+        if msg_type == 'ERROR':
+                title = msg_type
+                icon = QMessageBox.Critical
+                buttons = QMessageBox.Ok
+        ## More msg_type here:
+
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setIcon(icon)
+        msg.setStandardButtons(buttons)
+        msg.setDetailedText(detail)
+        msg.exec_()
+# class TerminateClass(QThread):
+#         def __init__(self,parent=None):
+#                 super(TerminateClass, self).__init__(parent)
+#         def run(self):
+#                 pass
+class MessageBox(QMessageBox):
+        def __init__(self,text='', msg_type='error', detail=''):
+                super().__init__()
+                msg_type = msg_type.upper()
+                if msg_type == 'ERROR':
+                        title = msg_type
+                        icon = QMessageBox.Critical
+                        buttons = QMessageBox.Ok
+                ## More msg_type here:
+
+                self.setWindowTitle(title)
+                self.setText(text)
+                self.setIcon(icon)
+                self.setStandardButtons(buttons)
+                self.setDetailedText(detail)
+
 
 
 if __name__ == "__main__":
