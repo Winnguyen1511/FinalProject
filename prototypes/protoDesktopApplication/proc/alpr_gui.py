@@ -23,12 +23,7 @@ class Ui_MainWindow(object):
             terminate_sig = pyqtSignal(str, str, str)
 
     def setupUi(self, MainWindow, name='MainWindow'):
-        # Termination handling:
-        self.sig = self.terminateSignalClass()
-        self.sig.terminate_sig.connect(self.msg_box)
-
-        ## Save the main window for exit handling:
-        self.MainWindow = MainWindow
+        
         MainWindow.setObjectName(name)
         MainWindow.resize(942, 529)
         MainWindow.setStyleSheet("")
@@ -233,6 +228,16 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        # Termination handling:
+        self.sig = self.terminateSignalClass()
+        self.sig.terminate_sig.connect(self.msg_box)
+
+        ## Save the main window for exit handling:
+        self.MainWindow = MainWindow
+        self.MainWindow.closeEvent = self.closeEvent
+        self.actionExit.triggered.connect(lambda: self.MainWindow.close())
+
+        ##################################################################
     def setNotifications(self, notifications):
         self.lbNotification.setText(notifications)
 
@@ -254,8 +259,15 @@ class Ui_MainWindow(object):
         self.actionNew.setText(_translate("MainWindow", "New.."))
         self.actionOpen.setText(_translate("MainWindow", "Open.."))
     
-    def testSigFunc(self):
-        print('> Sig triggered...')
+#     def testSigFunc(self):
+#         print('> Sig triggered...')
+
+    def closeEvent(self,event):
+        reply = self.msg_box(text='Are you sure you want to close the window?', msg_type='Question')
+        if reply == QMessageBox.Yes:
+                event.accept()
+        else:
+                event.ignore()
 
     def msg_box(self,text='', msg_type='error', detail=''):
         msg = QMessageBox()
@@ -267,6 +279,11 @@ class Ui_MainWindow(object):
                 buttons = QMessageBox.Ok
                 quitButton = QMessageBox.Ok
         ## More msg_type here:
+        elif msg_type == 'QUESTION':
+                title = msg_type
+                icon = QMessageBox.Question
+                buttons = QMessageBox.Yes | QMessageBox.No
+                quitButton = QMessageBox.Yes
 
         msg.setWindowTitle(title)
         msg.setText(text)
@@ -278,6 +295,7 @@ class Ui_MainWindow(object):
         if ret == quitButton:
                 ## Close immediately the main window:
                 self.MainWindow.close()
+                return ret
 
 if __name__ == "__main__":
     import sys

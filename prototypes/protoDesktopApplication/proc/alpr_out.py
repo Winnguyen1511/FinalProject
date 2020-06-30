@@ -104,7 +104,7 @@ def sysLogin():
     print('> Logged in!')
     return True
 def getStaffID():
-    return 'STF002'
+    return "STF002"
 def getCameraID():
     return 'CM0002'
 
