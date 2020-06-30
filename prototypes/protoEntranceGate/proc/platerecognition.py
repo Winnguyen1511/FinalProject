@@ -49,17 +49,22 @@ gpuMode = 0.1
 testfile = dir+'resources/data'
 
 def sysInit_Default():
-    plateOptions = {"pbLoad": platePbDir, "metaLoad": plateMetaDir, "gpu": gpuMode}
-    yoloPlate = TFNet(plateOptions)
-    characterRecognition = tf.keras.models.load_model(charCnnDir)
+    try:
+        plateOptions = {"pbLoad": platePbDir, "metaLoad": plateMetaDir, "gpu": gpuMode}
+        yoloPlate = TFNet(plateOptions)
+        characterRecognition = tf.keras.models.load_model(charCnnDir)
+    except Exception as e:
+        return False, e
     return yoloPlate, characterRecognition
 
 def sysInit(platePb, plateMeta, charCnn, gpu):
-    plateOptions = {"pbLoad": platePb, "metaLoad": plateMeta, "gpu": gpu}
-    yoloPlate = TFNet(plateOptions)
-
-    characterRecognition = tf.keras.models.load_model(charCnn)
-
+    try:
+        plateOptions = {"pbLoad": platePb, "metaLoad": plateMeta, "gpu": gpu}
+        yoloPlate = TFNet(plateOptions)
+        characterRecognition = tf.keras.models.load_model(charCnn)
+    except Exception as e:
+        print('>Error...')
+        return False, e
     return yoloPlate, characterRecognition
 
 def plateRecogTest(yoloPlate, characterRecognition, testfile):
