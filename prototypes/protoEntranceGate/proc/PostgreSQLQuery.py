@@ -5,7 +5,7 @@ from datetime import datetime as DT
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '5432'
 DEFAULT_USERNAME = 'winnguyen'
-DEFAULT_PASSWORD = 'khoanguyen1511dn.'
+DEFAULT_PASSWORD = 'khoanguyen1511dn..'
 DEFAULT_DATABASE = 'parkinglotdatabase'
 
 def login_database_Default():

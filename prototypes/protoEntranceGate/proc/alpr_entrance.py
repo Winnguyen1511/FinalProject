@@ -18,10 +18,16 @@ class Ui_MainWindow(object):
 
     class testSignalClass(QObject):
             test_sig = pyqtSignal()
+    class terminateSignalClass(QObject):
+            terminate_sig = pyqtSignal(str, str, str)
 
     def setupUi(self, MainWindow):
-        self.sig = self.testSignalClass()
-        self.sig.test_sig.connect(self.testSigFunc)
+        # self.sig = self.testSignalClass()
+        # self.sig.test_sig.connect(self.msg_box)
+
+        self.sig = self.terminateSignalClass()
+        self.sig.terminate_sig.connect(self.msg_box)
+        self.MainWindow = MainWindow
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(942, 529)
         MainWindow.setStyleSheet("")
@@ -258,6 +264,7 @@ class Ui_MainWindow(object):
                 title = msg_type
                 icon = QMessageBox.Critical
                 buttons = QMessageBox.Ok
+                quitButton = QMessageBox.Ok
         ## More msg_type here:
 
         msg.setWindowTitle(title)
@@ -265,7 +272,12 @@ class Ui_MainWindow(object):
         msg.setIcon(icon)
         msg.setStandardButtons(buttons)
         msg.setDetailedText(detail)
-        msg.exec_()
+        ret = msg.exec_()
+
+        if ret == quitButton:
+                ## Close immediately the main window:
+                self.MainWindow.close()
+        # self.quit()
 # class TerminateClass(QThread):
 #         def __init__(self,parent=None):
 #                 super(TerminateClass, self).__init__(parent)

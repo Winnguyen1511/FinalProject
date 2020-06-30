@@ -178,9 +178,11 @@ def main():
                 # ui.msg_box('Error: Log in error to <'+username+'>', detail=str(ret))
                 # error_msg_box = AE.MessageBox('Error: Log in error to <'+username+'>', detail=str(ret))
                 # error_msg_box.exec_()
-                while True:
-                    ui.sig.test_sig.emit()
-                    time.sleep(1)
+                # while True:
+                #     ui.sig.test_sig.emit()
+                #     time.sleep(1)
+                ui.sig.terminate_sig.emit('Error: Log in error to <'+username+'>', 'error',str(ret) )
+                # app.quit()
                 print('>Exit...')
                 # error_status = True
                 ## Quit the app immediately.
@@ -195,6 +197,7 @@ def main():
             if yoloPlate == False:
                 print('> Error: loading database for AI Core')
                 # ui.msg_box('> Error: loading database for AI Core', detail=str(characterRecognition))
+                ui.sig.terminate_sig.emit('> Error: loading database for AI Core', 'error',str(characterRecognition) )
                 # app.quit()
                 # MainWindow.close()
                 # error_status = True
