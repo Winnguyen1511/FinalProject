@@ -277,6 +277,7 @@ class Ui_MainWindow(object):
 
     def msg_box(self,text='', msg_type='error', detail=''):
         msg = QMessageBox()
+        
         msg_type = msg_type.upper()
 
         if msg_type == 'ERROR':
