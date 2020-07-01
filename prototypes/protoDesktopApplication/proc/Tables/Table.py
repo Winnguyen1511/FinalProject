@@ -7,6 +7,7 @@ logdir = 'dberr_log/'
 
 def rfidValid(rfid):
     return True
+
 def parkingLotIDValid(parkingLotID):
     if not isinstance(parkingLotID, str):
         print('> Error: Invalid data type')
@@ -17,6 +18,7 @@ def parkingLotIDValid(parkingLotID):
         print('> Require len=6 but got len=%d',length)
         return False
     return True
+
 def staffIDValid(StaffID):
     # print(type(staffID))
     # if not isinstance(staffID, str):
