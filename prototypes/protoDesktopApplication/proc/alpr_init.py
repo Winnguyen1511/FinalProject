@@ -1,8 +1,5 @@
 import json
 
-
-
-
 def sysLogin(sysconfig_file, gate):
     #Simulate loging process
     # global sysconfig
