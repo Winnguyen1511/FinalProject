@@ -10,6 +10,24 @@
             "previewLimit": 50,
             "server": "localhost",
             "username": "winnguyen"
+        },
+        {
+            "database": "testdjangodatabase",
+            "driver": "PostgreSQL",
+            "name": "testdjangoconnection",
+            "password": "khoanguyen1511dn..",
+            "pgOptions": {
+                "ssl": {
+                    "cert": "/home/khoa/FinalProject_Repo/FinalProject/Database/12642366_localhost.cert",
+                    "key": "/home/khoa/FinalProject_Repo/FinalProject/Database/12642366_localhost.key",
+                    "rejectUnauthorized": false,
+                    "requestCert": false
+                }
+            },
+            "port": 5432,
+            "previewLimit": 50,
+            "server": "localhost",
+            "username": "winnguyen"
         }
     ]
 }
