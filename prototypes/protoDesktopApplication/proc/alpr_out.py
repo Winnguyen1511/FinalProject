@@ -16,6 +16,8 @@ import argparse
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QThread
 
+from alpr_init import *
+
 INIT_STATE = 0
 SCAN_STATE = 1
 DATABASE_STATE = 2
@@ -35,10 +37,10 @@ MAX_WIDTH = 150
 
 
 lstRFID = [str(rfid) for rfid in range(1, 1000)]
-def getRFID():
-    return lstRFID.pop(-1)
-def getParkingLotID():
-    return 'PKL001'
+
+sysconfig = {}
+sysconfig_file = 'proc/sysconfig.json'
+gate="out"
 
 def imshow(im):
     imsize = im.shape
@@ -100,18 +102,11 @@ def btnSkipCallback():
     if state == DATABASE_STATE:
         skip_plate = True
 
-def sysLogin():
-    #Simulate loging process
-    print('> Logged in!')
-    return True
-def getStaffID():
-    return "STF002"
-def getCameraID():
-    return 'CM0002'
 
 def main():
     #Init the system:
-    res = sysLogin()
+    global sysconfig
+    res, sysconfig = sysLogin(sysconfig_file, gate)
     if res == False:
         print('> Login failed!')
         return False
@@ -147,7 +142,10 @@ def main():
     if args.host:
         host = args.host
     else:
-        host = psq.DEFAULT_HOST
+        if isinstance(sysconfig["host"], str):
+            host = sysconfig["host"]
+        else:
+            host = psq.DEFAULT_HOST
 
     #Init GUI: 
     import sys
@@ -207,11 +205,11 @@ def main():
             
 
             ## 4) Get Information of the working session:
-            StaffID = getStaffID()
+            StaffID = getStaffID(sysconfig)
             ui.lbStaffDesc.setText(StaffID)
-            ParkingLotID = getParkingLotID()
+            ParkingLotID = getParkingLotID(sysconfig)
             ui.lbParkingLotDesc.setText(ParkingLotID)
-            CameraID = getCameraID()
+            CameraID = getCameraID(sysconfig)
             ui.lbCameraDesc.setText(CameraID)
 
             for imgName in lstImg:
@@ -231,7 +229,7 @@ def main():
                         return True
 
                 ui.setNotifications('Please wait...')
-                RFID = getRFID()
+                RFID = getRFID(lstRFID)
                 ui.lbRFIDDesc.setText(RFID)
 
                 ###############################################################
