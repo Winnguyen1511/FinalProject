@@ -15,6 +15,7 @@ import time
 import argparse
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QThread
+
 INIT_STATE = 0
 SCAN_STATE = 1
 DATABASE_STATE = 2
