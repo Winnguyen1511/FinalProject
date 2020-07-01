@@ -8,9 +8,9 @@ logdir = 'dberr_log/'
 def rfidValid(rfid):
     return True
 def parkingLotIDValid(parkingLotID):
-    # if not isinstance(parkingLotID, str):
-    #     print('> Error: Invalid data type')
-    #     return False
+    if not isinstance(parkingLotID, str):
+        print('> Error: Invalid data type')
+        return False
     length = len(parkingLotID)
     if length != 6:
         print('> Error: Invalid data lenght')
@@ -22,23 +22,24 @@ def staffIDValid(StaffID):
     # if not isinstance(staffID, str):
     #     print('> Error: Invalid data type')
     #     return False
-    length = len(StaffID)
-    if length != 6:
-        print('> Error: Invalid data length')
-        print('> Require len=6 but got len=%d',length)
-        return False
+    # length = len(StaffID)
+    # if length != 6:
+    #     print('> Error: Invalid data length')
+    #     print('> Require len=6 but got len=%d',length)
+    #     return False
     return True
 
 def cameraIDValid(cameraID):
-    # if not isinstance(cameraID, str):
-    #     print('> Error: Invalid data type')
-    #     return False
+    if not isinstance(cameraID, str):
+        print('> Error: Invalid data type')
+        return False
     length = len(cameraID)
     if length != 6:
         print('> Error: Invalid data lenght')
         print('> Require len=6 but got len=%d',length)
         return False
     return True
+    
 class Table:
     def __init__(self, tableName, connectionDb, cursorDB):
         #Init Log system:

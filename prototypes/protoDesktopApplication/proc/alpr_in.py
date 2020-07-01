@@ -201,6 +201,7 @@ def main():
 
             ## 4) Get Information of the working session:
             StaffID = getStaffID(sysconfig)
+            print(type(StaffID))
             ui.lbStaffDesc.setText(StaffID)
             ParkingLotID = getParkingLotID(sysconfig)
             ui.lbParkingLotDesc.setText(ParkingLotID)
