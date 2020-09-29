@@ -1,12 +1,12 @@
 {
     "in":{
-        "host":"10.72.83.204",
+        "host":"localhost",
         "parkinglotid":"PKL001",
         "staffid":"STF001",
         "cameraid":"CM0001"
     },
     "out":{
-        "host":"10.72.83.204",
+        "host":"localhost",
         "parkinglotid":"PKL001",
         "staffid":"STF002",
         "cameraid":"CM0002"

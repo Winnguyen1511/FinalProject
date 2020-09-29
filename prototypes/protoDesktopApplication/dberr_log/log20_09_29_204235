@@ -1,0 +1,12 @@
+[LOG] Time: 2020-09-29 20:42:52
+[ERROR] > Error insert <parking>
+duplicate key value violates unique constraint "pk_parking_rfid_parkinglotid"
+DETAIL:  Key (rfid, parkinglotid)=(999         , PKL001) already exists.
+
+-------------------------------------------------------
+[LOG] Time: 2020-09-29 20:42:57
+[ERROR] > Error insert <parking>
+duplicate key value violates unique constraint "pk_parking_rfid_parkinglotid"
+DETAIL:  Key (rfid, parkinglotid)=(998         , PKL001) already exists.
+
+-------------------------------------------------------
