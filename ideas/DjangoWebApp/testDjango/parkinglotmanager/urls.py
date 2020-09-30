@@ -3,5 +3,5 @@ from . import views
 
 urlpatterns = [
     path('plm/',views.index, name='plm-index'), 
-    path('plm/edit/', views.edit, name='plm-eidt')
+    path('plm/edit/', views.edit, name='plm-edit')
 ]
